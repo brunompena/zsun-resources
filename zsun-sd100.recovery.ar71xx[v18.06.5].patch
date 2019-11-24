@@ -1,0 +1,416 @@
+diff --git a/target/linux/ar71xx/base-files/etc/board.d/02_network b/target/linux/ar71xx/base-files/etc/board.d/02_network
+index e952225..2a9fc53 100755
+--- a/target/linux/ar71xx/base-files/etc/board.d/02_network
++++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
+@@ -149,7 +149,8 @@ ar71xx_setup_interfaces()
+ 	wi2a-ac200i|\
+ 	wifi-pineapple-nano|\
+ 	wndap360|\
+-	wp543)
++	wp543|\
++	zsun-sd100)
+ 		ucidef_set_interface_lan "eth0"
+ 		;;
+ 	a40|\
+diff --git a/target/linux/ar71xx/base-files/etc/diag.sh b/target/linux/ar71xx/base-files/etc/diag.sh
+index 4eb2abb..f019ed3 100644
+--- a/target/linux/ar71xx/base-files/etc/diag.sh
++++ b/target/linux/ar71xx/base-files/etc/diag.sh
+@@ -50,7 +50,8 @@ get_status_led() {
+ 	tew-632brp|\
+ 	tl-wr942n-v1|\
+ 	wpj344|\
+-	zbt-we1526)
++	zbt-we1526|\
++	zsun-sd100)
+ 		status_led="$board:green:status"
+ 		;;
+ 	ap136-010|\
+diff --git a/target/linux/ar71xx/base-files/etc/rc.button/BTN_0 b/target/linux/ar71xx/base-files/etc/rc.button/BTN_0
+new file mode 100644
+index 0000000..64c3446
+--- /dev/null
++++ b/target/linux/ar71xx/base-files/etc/rc.button/BTN_0
+@@ -0,0 +1,15 @@
++#!/bin/sh
++
++case "$ACTION" in
++pressed)
++	logger -t sdcard_event "SD Card inserted"
++	echo 0 > /sys/class/gpio/gpio18/value
++	echo 1 > /sys/class/gpio/gpio18/value
++	;;
++released)
++	logger -t sdcard_event "SD Card removed"
++	echo 0 > /sys/class/gpio/gpio18/value
++	;;
++esac
++
++return 0
+diff --git a/target/linux/ar71xx/base-files/etc/uci-defaults/99_enable-wifi b/target/linux/ar71xx/base-files/etc/uci-defaults/99_enable-wifi
+new file mode 100644
+index 0000000..ce93778
+--- /dev/null
++++ b/target/linux/ar71xx/base-files/etc/uci-defaults/99_enable-wifi
+@@ -0,0 +1,6 @@
++#!/bin/sh
++
++uci set wireless.@wifi-device[0].disabled=0
++uci commit wireless
++
++exit 0
+diff --git a/target/linux/ar71xx/base-files/lib/ar71xx.sh b/target/linux/ar71xx/base-files/lib/ar71xx.sh
+index ccbd4e7..9228540 100755
+--- a/target/linux/ar71xx/base-files/lib/ar71xx.sh
++++ b/target/linux/ar71xx/base-files/lib/ar71xx.sh
+@@ -1515,6 +1515,9 @@ ar71xx_board_detect() {
+ 	*"ZCN-1523H-5")
+ 		name="zcn-1523h-5"
+ 		;;
++	*"Zsun SD100")
++		name="zsun-sd100"
++		;;
+ 	esac
+ 
+ 	[ -z "$AR71XX_MODEL" ] && [ "${machine:0:8}" = 'TP-LINK ' ] && \
+diff --git a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
+index ca1270b..f295ed5 100755
+--- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
++++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
+@@ -324,7 +324,8 @@ platform_check_image() {
+ 	wzr-hp-g300nh|\
+ 	wzr-hp-g300nh2|\
+ 	wzr-hp-g450h|\
+-	xd3200)
++	xd3200|\
++	zsun-sd100)
+ 		[ "$magic" != "2705" ] && {
+ 			echo "Invalid image type."
+ 			return 1
+diff --git a/target/linux/ar71xx/config-4.9 b/target/linux/ar71xx/config-4.9
+index 8aa0b41..df3fd54 100644
+--- a/target/linux/ar71xx/config-4.9
++++ b/target/linux/ar71xx/config-4.9
+@@ -276,6 +276,7 @@ CONFIG_ATH79=y
+ # CONFIG_ATH79_MACH_Z1 is not set
+ # CONFIG_ATH79_MACH_ZBT_WE1526 is not set
+ # CONFIG_ATH79_MACH_ZCN_1523H is not set
++# CONFIG_ATH79_MACH_ZSUN_SD100 is not set
+ # CONFIG_ATH79_NVRAM is not set
+ # CONFIG_ATH79_PCI_ATH9K_FIXUP is not set
+ # CONFIG_ATH79_ROUTERBOOT is not set
+diff --git a/target/linux/ar71xx/files/arch/mips/ath79/Kconfig.openwrt b/target/linux/ar71xx/files/arch/mips/ath79/Kconfig.openwrt
+index 1d0e3d9..fc911b9 100644
+--- a/target/linux/ar71xx/files/arch/mips/ath79/Kconfig.openwrt
++++ b/target/linux/ar71xx/files/arch/mips/ath79/Kconfig.openwrt
+@@ -2419,3 +2419,13 @@ config ATH79_MACH_FRITZ450E
+ 	select ATH79_DEV_LEDS_GPIO
+ 	select ATH79_DEV_M25P80
+ 	select ATH79_DEV_WMAC
++
++config ATH79_MACH_ZSUN_SD100
++	bool "Zsun SD100"
++	select SOC_AR933X
++	select ATH79_DEV_ETH
++	select ATH79_DEV_GPIO_BUTTONS
++	select ATH79_DEV_LEDS_GPIO
++	select ATH79_DEV_M25P80
++	select ATH79_DEV_USB
++	select ATH79_DEV_WMAC
+diff --git a/target/linux/ar71xx/files/arch/mips/ath79/Makefile b/target/linux/ar71xx/files/arch/mips/ath79/Makefile
+index 8800a7d..9149660 100644
+--- a/target/linux/ar71xx/files/arch/mips/ath79/Makefile
++++ b/target/linux/ar71xx/files/arch/mips/ath79/Makefile
+@@ -286,3 +286,4 @@ obj-$(CONFIG_ATH79_MACH_XD3200)			+= mach-sr3200.o
+ obj-$(CONFIG_ATH79_MACH_Z1)			+= mach-z1.o
+ obj-$(CONFIG_ATH79_MACH_ZBT_WE1526)		+= mach-zbt-we1526.o
+ obj-$(CONFIG_ATH79_MACH_ZCN_1523H)		+= mach-zcn-1523h.o
++obj-$(CONFIG_ATH79_MACH_ZSUN_SD100)		+= mach-zsun-sd100.o
+diff --git a/target/linux/ar71xx/files/arch/mips/ath79/mach-zsun-sd100.c b/target/linux/ar71xx/files/arch/mips/ath79/mach-zsun-sd100.c
+new file mode 100644
+index 0000000..110d885
+--- /dev/null
++++ b/target/linux/ar71xx/files/arch/mips/ath79/mach-zsun-sd100.c
+@@ -0,0 +1,105 @@
++/*
++ *  Zsun SD100 (WiFi SD Card Reader) support
++ *
++ *  Copyright (C) 2015 by Andrzej Surowiec <emeryth@hackerspace.pl>
++ *  Based on mach-carambola2.c copyright (C) 2013 Darius Augulis <darius@8devices.com>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ */
++
++#include <linux/gpio.h>
++
++#include <asm/mach-ath79/ath79.h>
++#include <asm/mach-ath79/ar71xx_regs.h>
++
++#include "common.h"
++#include "dev-eth.h"
++#include "dev-gpio-buttons.h"
++#include "dev-leds-gpio.h"
++#include "dev-m25p80.h"
++#include "dev-usb.h"
++#include "dev-wmac.h"
++#include "machtypes.h"
++
++#define ZSUN_SD100_GPIO_LED_STATUS		0
++#define ZSUN_SD100_GPIO_SDREADER_RESET		18
++#define ZSUN_SD100_GPIO_SDREADER_SWITCH		21
++#define ZSUN_SD100_GPIO_SDCARD_EVENT		22
++
++#define ZSUN_SD100_ETH_MAC0_OFFSET		0x0000
++#define ZSUN_SD100_ETH_MAC1_OFFSET		0x0006
++
++#define ZSUN_SD100_WMAC_CALDATA_OFFSET		0x1000
++#define ZSUN_SD100_WMAC_MAC_OFFSET		0x1002
++
++#define ZSUN_SD100_KEYS_POLL_INTERVAL		20	/* msecs */
++#define ZSUN_SD100_KEYS_DEBOUNCE_INTERVAL	(3 * ZSUN_SD100_KEYS_POLL_INTERVAL)
++
++static struct gpio_led zsun_sd100_leds_gpio[] __initdata = {
++	{
++		.name			= "zsun-sd100:green:status",
++		.gpio			= ZSUN_SD100_GPIO_LED_STATUS,
++		.active_low		= 0,
++	}
++};
++
++static struct gpio_keys_button zsun_sd100_gpio_keys[] __initdata = {
++	{
++		.desc			= "SD Card Insertion/Removal Event",
++		.type			= EV_KEY,
++		.code			= BTN_0,
++		.debounce_interval	= ZSUN_SD100_KEYS_DEBOUNCE_INTERVAL,
++		.gpio			= ZSUN_SD100_GPIO_SDCARD_EVENT,
++		.active_low		= 1,
++	}
++};
++
++static void __init zsun_sd100_setup(void)
++{
++	u8 *art = (u8 *) KSEG1ADDR(0x1fff0000);
++
++	ath79_register_m25p80(NULL);
++
++	ath79_setup_ar933x_phy4_switch(true, true);
++
++	ath79_gpio_function_disable(AR933X_GPIO_FUNC_ETH_SWITCH_LED0_EN |
++				    AR933X_GPIO_FUNC_ETH_SWITCH_LED1_EN |
++				    AR933X_GPIO_FUNC_ETH_SWITCH_LED2_EN |
++				    AR933X_GPIO_FUNC_ETH_SWITCH_LED3_EN |
++				    AR933X_GPIO_FUNC_ETH_SWITCH_LED4_EN );
++
++	ath79_init_mac(ath79_eth0_data.mac_addr,
++		       art + ZSUN_SD100_ETH_MAC0_OFFSET, 0);
++	ath79_init_mac(ath79_eth1_data.mac_addr,
++		       art + ZSUN_SD100_ETH_MAC1_OFFSET, 0);
++
++	ath79_register_mdio(0, 0x0);
++
++	//ath79_register_eth(1);
++	//ath79_register_eth(0);
++
++	ath79_register_wmac(art + ZSUN_SD100_WMAC_CALDATA_OFFSET,
++			    art + ZSUN_SD100_WMAC_MAC_OFFSET);
++
++	ath79_register_leds_gpio(-1, ARRAY_SIZE(zsun_sd100_leds_gpio),
++				 zsun_sd100_leds_gpio);
++
++	ath79_register_gpio_keys_polled(1, ZSUN_SD100_KEYS_POLL_INTERVAL,
++					ARRAY_SIZE(zsun_sd100_gpio_keys),
++					zsun_sd100_gpio_keys);
++
++	ath79_register_usb();
++
++	gpio_request_one(ZSUN_SD100_GPIO_SDREADER_RESET,
++			 GPIOF_OUT_INIT_HIGH | GPIOF_EXPORT_DIR_FIXED,
++			 "SD Reader Reset");
++
++	gpio_request_one(ZSUN_SD100_GPIO_SDREADER_SWITCH,
++			 GPIOF_OUT_INIT_LOW | GPIOF_EXPORT_DIR_FIXED,
++			 "SD Reader SoC/USB Switch");
++}
++
++MIPS_MACHINE(ATH79_MACH_ZSUN_SD100, "ZSUN-SD100", "Zsun SD100",
++	     zsun_sd100_setup);
+diff --git a/target/linux/ar71xx/files/arch/mips/ath79/machtypes.h b/target/linux/ar71xx/files/arch/mips/ath79/machtypes.h
+index 80f6e1d..201e4f1 100644
+--- a/target/linux/ar71xx/files/arch/mips/ath79/machtypes.h
++++ b/target/linux/ar71xx/files/arch/mips/ath79/machtypes.h
+@@ -374,6 +374,7 @@ enum ath79_mach_type {
+ 	ATH79_MACH_ZBT_WE1526,			/* Zbtlink ZBT-WE1526 */
+ 	ATH79_MACH_ZCN_1523H_2,			/* Zcomax ZCN-1523H-2-xx */
+ 	ATH79_MACH_ZCN_1523H_5,			/* Zcomax ZCN-1523H-5-xx */
++	ATH79_MACH_ZSUN_SD100,			/* Zsun SD100 */
+ };
+ 
+ #endif /* _ATH79_MACHTYPE_H */
+diff --git a/target/linux/ar71xx/generic/config-default b/target/linux/ar71xx/generic/config-default
+index 55ccd93..dd69f36 100644
+--- a/target/linux/ar71xx/generic/config-default
++++ b/target/linux/ar71xx/generic/config-default
+@@ -204,6 +204,7 @@ CONFIG_ATH79_MACH_WZR_HP_G450H=y
+ CONFIG_ATH79_MACH_XD3200=y
+ CONFIG_ATH79_MACH_ZBT_WE1526=y
+ CONFIG_ATH79_MACH_ZCN_1523H=y
++CONFIG_ATH79_MACH_ZSUN_SD100=y
+ CONFIG_ATH79_NVRAM=y
+ CONFIG_ATH79_PCI_ATH9K_FIXUP=y
+ CONFIG_BLK_MQ_PCI=y
+diff --git a/target/linux/ar71xx/image/generic.mk b/target/linux/ar71xx/image/generic.mk
+index 6405575..3b05b22 100644
+--- a/target/linux/ar71xx/image/generic.mk
++++ b/target/linux/ar71xx/image/generic.mk
+@@ -1388,3 +1388,16 @@ define Device/fritz450e
+   IMAGE_SIZE := 15232k
+ endef
+ TARGET_DEVICES += fritz450e
++
++define Device/zsun-sd100
++  DEVICE_TITLE := Zsun SD100
++  DEVICE_PACKAGES := kmod-usb2 kmod-usb-storage kmod-fs-ext4 kmod-fs-vfat kmod-fs-exfat kmod-fs-ntfs kmod-mtd-rw kmod-block2mtd kmod-loop losetup snapshot-tool
++  BOARDNAME := ZSUN-SD100
++  SUPPORTED_DEVICES := zsun-sd100
++  IMAGE_SIZE := 4096k
++  CONSOLE := ttyATH0,115200
++  MTDPARTS := spi0.0:64k(u-boot)ro,64k(u-boot-env)ro,12032k(firmware),4096k(recovery)ro,64k(nvram)ro,64k(art)ro
++  IMAGES := recovery.bin
++  IMAGE/recovery.bin := append-kernel | pad-to $$$$(BLOCKSIZE) | append-rootfs | pad-to $$$$(BLOCKSIZE) | check-size $$$$(IMAGE_SIZE)
++endef
++TARGET_DEVICES += zsun-sd100
+diff --git a/target/linux/generic/config-4.9 b/target/linux/generic/config-4.9
+index 300707b..503c6f9 100644
+--- a/target/linux/generic/config-4.9
++++ b/target/linux/generic/config-4.9
+@@ -2651,7 +2651,7 @@ CONFIG_MTD_SPLIT=y
+ # CONFIG_MTD_SPLIT_BRNIMAGE_FW is not set
+ # CONFIG_MTD_SPLIT_EVA_FW is not set
+ # CONFIG_MTD_SPLIT_FIRMWARE is not set
+-CONFIG_MTD_SPLIT_FIRMWARE_NAME="firmware"
++CONFIG_MTD_SPLIT_FIRMWARE_NAME="recovery"
+ # CONFIG_MTD_SPLIT_FIT_FW is not set
+ # CONFIG_MTD_SPLIT_JIMAGE_FW is not set
+ # CONFIG_MTD_SPLIT_LZMA_FW is not set
+diff --git a/target/linux/generic/hack-4.9/430-inherit-parent-partition-access-mode.patch b/target/linux/generic/hack-4.9/430-inherit-parent-partition-access-mode.patch
+new file mode 100644
+index 0000000..73ca037
+--- /dev/null
++++ b/target/linux/generic/hack-4.9/430-inherit-parent-partition-access-mode.patch
+@@ -0,0 +1,60 @@
++--- a/drivers/mtd/mtdchar.c
+++++ b/drivers/mtd/mtdchar.c
++@@ -595,7 +595,10 @@
++ 		/* Sanitize user input */
++ 		p.devname[BLKPG_DEVNAMELTH - 1] = '\0';
++ 
++-		return mtd_add_partition(mtd, p.devname, p.start, p.length);
+++		/* No mtd flags masking required */
+++		uint32_t mask_flags = 0;
+++
+++		return mtd_add_partition(mtd, p.devname, p.start, p.length, mask_flags);
++ 
++ 	case BLKPG_DEL_PARTITION:
++ 
++--- a/drivers/mtd/mtdpart.c
+++++ b/drivers/mtd/mtdpart.c
++@@ -704,7 +704,7 @@
++ }
++ 
++ int mtd_add_partition(struct mtd_info *parent, const char *name,
++-		      long long offset, long long length)
+++		      long long offset, long long length, uint32_t mask_flags)
++ {
++ 	struct mtd_partition part;
++ 	struct mtd_part *new;
++@@ -725,6 +725,7 @@
++ 	part.name = name;
++ 	part.size = length;
++ 	part.offset = offset;
+++	part.mask_flags = mask_flags;
++ 
++ 	new = allocate_partition(parent, &part, -1, offset);
++ 	if (IS_ERR(new))
++@@ -833,10 +834,14 @@
++ 		/* adjust partition offsets */
++ 		parts[i].offset += slave->offset;
++ 
+++		/* adjust partition mask */
+++		parts[i].mask_flags = !(slave->mtd.flags & MTD_WRITEABLE) ? MTD_WRITEABLE : 0;
+++
++ 		mtd_add_partition(slave->parent,
++ 				  parts[i].name,
++ 				  parts[i].offset,
++-				  parts[i].size);
+++				  parts[i].size,
+++				  parts[i].mask_flags);
++ 	}
++ 
++ 	kfree(parts);
++--- a/include/linux/mtd/partitions.h
+++++ b/include/linux/mtd/partitions.h
++@@ -113,7 +113,7 @@
++ 
++ int mtd_is_partition(const struct mtd_info *mtd);
++ int mtd_add_partition(struct mtd_info *master, const char *name,
++-		      long long offset, long long length);
+++		      long long offset, long long length, uint32_t mask_flags);
++ int mtd_del_partition(struct mtd_info *master, int partno);
++ struct mtd_info *mtdpart_get_master(const struct mtd_info *mtd);
++ uint64_t mtdpart_get_offset(const struct mtd_info *mtd);
+diff --git a/package/system/fstools/patches/001-add-support-for-readonly-mtd.patch b/package/system/fstools/patches/001-add-support-for-readonly-mtd.patch
+new file mode 100644
+index 0000000..78abb5d
+--- /dev/null
++++ b/package/system/fstools/patches/001-add-support-for-readonly-mtd.patch
+@@ -0,0 +1,47 @@
++--- a/libfstools/mtd.c
+++++ b/libfstools/mtd.c
++@@ -36,20 +36,32 @@ struct mtd_volume {
++ 
++ static struct driver mtd_driver;
++ 
+++static int mtd_open_device(const char *dev)
+++{
+++	int ret;
+++
+++	if ((ret = open(dev, O_RDWR | O_SYNC)) > -1)
+++		ULOG_INFO("Opened mtd device: %s (read-write)\n", dev);
+++	else if ((ret = open(dev, O_RDONLY)) > -1)
+++		ULOG_INFO("Opened mtd device: %s (read-only)\n", dev);
+++
+++	return ret;
+++}
+++
++ static int mtd_open(const char *mtd, int block)
++ {
++ 	FILE *fp;
++ 	char dev[PATH_MAX];
++-	int i, ret, flags = O_RDWR | O_SYNC;
+++	int i, ret;
++ 
++ 	if ((fp = fopen("/proc/mtd", "r"))) {
++ 		while (fgets(dev, sizeof(dev), fp)) {
++ 			if (sscanf(dev, "mtd%d:", &i) && strstr(dev, mtd)) {
++ 				snprintf(dev, sizeof(dev), "/dev/mtd%s/%d", (block ? "block" : ""), i);
++-				ret = open(dev, flags);
+++				ret = mtd_open_device(dev);
++ 				if (ret < 0) {
++ 					snprintf(dev, sizeof(dev), "/dev/mtd%s%d", (block ? "block" : ""), i);
++-					ret = open(dev, flags);
+++					ret = mtd_open_device(dev);
++ 				}
++ 				fclose(fp);
++ 				return ret;
++@@ -58,7 +70,7 @@ static int mtd_open(const char *mtd, int block)
++ 		fclose(fp);
++ 	}
++ 
++-	return open(mtd, flags);
+++	return mtd_open_device(mtd);
++ }
++ 
++ static void mtd_volume_close(struct mtd_volume *p)

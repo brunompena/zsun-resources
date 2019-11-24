@@ -1,0 +1,401 @@
+diff --git a/target/linux/ar71xx/base-files/etc/diag.sh b/target/linux/ar71xx/base-files/etc/diag.sh
+index 89fe53c..d426e25 100644
+--- a/target/linux/ar71xx/base-files/etc/diag.sh
++++ b/target/linux/ar71xx/base-files/etc/diag.sh
+@@ -351,6 +351,9 @@ get_status_led() {
+ 	wlr8100)
+ 		status_led="sitecom:amber:status"
+ 		;;
++	zsun-sd100)
++		status_led="zsun-sd100:green:status"
++		;;
+ 	esac
+ }
+ 
+diff --git a/target/linux/ar71xx/base-files/etc/uci-defaults/02_network b/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
+index 8143d2d..72577f4 100755
+--- a/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
++++ b/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
+@@ -364,7 +364,8 @@ tl-wr703n |\
+ tube2h |\
+ wndap360 |\
+ mynet-rext |\
+-wp543)
++wp543 |\
++zsun-sd100)
+ 	ucidef_set_interface_lan "eth0"
+ 	;;
+ 
+diff --git a/target/linux/ar71xx/base-files/etc/rc.button/BTN_0 b/target/linux/ar71xx/base-files/etc/rc.button/BTN_0
+new file mode 100755
+index 0000000..64c3446
+--- /dev/null
++++ b/target/linux/ar71xx/base-files/etc/rc.button/BTN_0
+@@ -0,0 +1,15 @@
++#!/bin/sh
++
++case "$ACTION" in
++pressed)
++	logger -t sdcard_event "SD Card inserted"
++	echo 0 > /sys/class/gpio/gpio18/value
++	echo 1 > /sys/class/gpio/gpio18/value
++	;;
++released)
++	logger -t sdcard_event "SD Card removed"
++	echo 0 > /sys/class/gpio/gpio18/value
++	;;
++esac
++
++return 0
+diff --git a/target/linux/ar71xx/base-files/etc/uci-defaults/99_enable-wifi b/target/linux/ar71xx/base-files/etc/uci-defaults/99_enable-wifi
+new file mode 100644
+index 0000000..ce93778
+--- /dev/null
++++ b/target/linux/ar71xx/base-files/etc/uci-defaults/99_enable-wifi
+@@ -0,0 +1,6 @@
++#!/bin/sh
++
++uci set wireless.@wifi-device[0].disabled=0
++uci commit wireless
++
++exit 0
+diff --git a/target/linux/ar71xx/base-files/lib/ar71xx.sh b/target/linux/ar71xx/base-files/lib/ar71xx.sh
+index 0b2857d..5dcc5a6 100755
+--- a/target/linux/ar71xx/base-files/lib/ar71xx.sh
++++ b/target/linux/ar71xx/base-files/lib/ar71xx.sh
+@@ -944,6 +944,9 @@ ar71xx_board_detect() {
+ 	*"HiWiFi HC6361")
+ 		name="hiwifi-hc6361"
+ 		;;
++	*"Zsun SD100")
++		name="zsun-sd100"
++		;;
+ 	esac
+ 
+ 	[ -z "$AR71XX_MODEL" ] && [ "${machine:0:8}" = 'TP-LINK ' ] && \
+diff --git a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
+index 8dea48f..0db0360 100755
+--- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
++++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
+@@ -249,7 +249,8 @@ platform_check_image() {
+ 	unifi | \
+ 	unifi-outdoor | \
+ 	carambola2 | \
+-	weio )
++	weio | \
++	zsun-sd100)
+ 		[ "$magic" != "2705" ] && {
+ 			echo "Invalid image type."
+ 			return 1
+diff --git a/target/linux/ar71xx/config-3.18 b/target/linux/ar71xx/config-3.18
+index e9b3c7c..01fce10 100644
+--- a/target/linux/ar71xx/config-3.18
++++ b/target/linux/ar71xx/config-3.18
+@@ -159,6 +159,7 @@ CONFIG_ATH79_MACH_WZR_HP_G300NH=y
+ CONFIG_ATH79_MACH_WZR_HP_G300NH2=y
+ CONFIG_ATH79_MACH_WZR_HP_G450H=y
+ CONFIG_ATH79_MACH_ZCN_1523H=y
++CONFIG_ATH79_MACH_ZSUN_SD100=y
+ CONFIG_ATH79_NVRAM=y
+ CONFIG_ATH79_PCI_ATH9K_FIXUP=y
+ # CONFIG_ATH79_ROUTERBOOT is not set
+diff --git a/target/linux/ar71xx/files/arch/mips/ath79/mach-zsun-sd100.c b/target/linux/ar71xx/files/arch/mips/ath79/mach-zsun-sd100.c
+new file mode 100644
+index 0000000..110d885
+--- /dev/null
++++ b/target/linux/ar71xx/files/arch/mips/ath79/mach-zsun-sd100.c
+@@ -0,0 +1,105 @@
++/*
++ *  Zsun SD100 (WiFi SD Card Reader) support
++ *
++ *  Copyright (C) 2015 by Andrzej Surowiec <emeryth@hackerspace.pl>
++ *  Based on mach-carambola2.c copyright (C) 2013 Darius Augulis <darius@8devices.com>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ */
++
++#include <linux/gpio.h>
++
++#include <asm/mach-ath79/ath79.h>
++#include <asm/mach-ath79/ar71xx_regs.h>
++
++#include "common.h"
++#include "dev-eth.h"
++#include "dev-gpio-buttons.h"
++#include "dev-leds-gpio.h"
++#include "dev-m25p80.h"
++#include "dev-usb.h"
++#include "dev-wmac.h"
++#include "machtypes.h"
++
++#define ZSUN_SD100_GPIO_LED_STATUS		0
++#define ZSUN_SD100_GPIO_SDREADER_RESET		18
++#define ZSUN_SD100_GPIO_SDREADER_SWITCH		21
++#define ZSUN_SD100_GPIO_SDCARD_EVENT		22
++
++#define ZSUN_SD100_ETH_MAC0_OFFSET		0x0000
++#define ZSUN_SD100_ETH_MAC1_OFFSET		0x0006
++
++#define ZSUN_SD100_WMAC_CALDATA_OFFSET		0x1000
++#define ZSUN_SD100_WMAC_MAC_OFFSET		0x1002
++
++#define ZSUN_SD100_KEYS_POLL_INTERVAL		20	/* msecs */
++#define ZSUN_SD100_KEYS_DEBOUNCE_INTERVAL	(3 * ZSUN_SD100_KEYS_POLL_INTERVAL)
++
++static struct gpio_led zsun_sd100_leds_gpio[] __initdata = {
++	{
++		.name			= "zsun-sd100:green:status",
++		.gpio			= ZSUN_SD100_GPIO_LED_STATUS,
++		.active_low		= 0,
++	}
++};
++
++static struct gpio_keys_button zsun_sd100_gpio_keys[] __initdata = {
++	{
++		.desc			= "SD Card Insertion/Removal Event",
++		.type			= EV_KEY,
++		.code			= BTN_0,
++		.debounce_interval	= ZSUN_SD100_KEYS_DEBOUNCE_INTERVAL,
++		.gpio			= ZSUN_SD100_GPIO_SDCARD_EVENT,
++		.active_low		= 1,
++	}
++};
++
++static void __init zsun_sd100_setup(void)
++{
++	u8 *art = (u8 *) KSEG1ADDR(0x1fff0000);
++
++	ath79_register_m25p80(NULL);
++
++	ath79_setup_ar933x_phy4_switch(true, true);
++
++	ath79_gpio_function_disable(AR933X_GPIO_FUNC_ETH_SWITCH_LED0_EN |
++				    AR933X_GPIO_FUNC_ETH_SWITCH_LED1_EN |
++				    AR933X_GPIO_FUNC_ETH_SWITCH_LED2_EN |
++				    AR933X_GPIO_FUNC_ETH_SWITCH_LED3_EN |
++				    AR933X_GPIO_FUNC_ETH_SWITCH_LED4_EN );
++
++	ath79_init_mac(ath79_eth0_data.mac_addr,
++		       art + ZSUN_SD100_ETH_MAC0_OFFSET, 0);
++	ath79_init_mac(ath79_eth1_data.mac_addr,
++		       art + ZSUN_SD100_ETH_MAC1_OFFSET, 0);
++
++	ath79_register_mdio(0, 0x0);
++
++	//ath79_register_eth(1);
++	//ath79_register_eth(0);
++
++	ath79_register_wmac(art + ZSUN_SD100_WMAC_CALDATA_OFFSET,
++			    art + ZSUN_SD100_WMAC_MAC_OFFSET);
++
++	ath79_register_leds_gpio(-1, ARRAY_SIZE(zsun_sd100_leds_gpio),
++				 zsun_sd100_leds_gpio);
++
++	ath79_register_gpio_keys_polled(1, ZSUN_SD100_KEYS_POLL_INTERVAL,
++					ARRAY_SIZE(zsun_sd100_gpio_keys),
++					zsun_sd100_gpio_keys);
++
++	ath79_register_usb();
++
++	gpio_request_one(ZSUN_SD100_GPIO_SDREADER_RESET,
++			 GPIOF_OUT_INIT_HIGH | GPIOF_EXPORT_DIR_FIXED,
++			 "SD Reader Reset");
++
++	gpio_request_one(ZSUN_SD100_GPIO_SDREADER_SWITCH,
++			 GPIOF_OUT_INIT_LOW | GPIOF_EXPORT_DIR_FIXED,
++			 "SD Reader SoC/USB Switch");
++}
++
++MIPS_MACHINE(ATH79_MACH_ZSUN_SD100, "ZSUN-SD100", "Zsun SD100",
++	     zsun_sd100_setup);
+diff --git a/target/linux/ar71xx/generic/profiles/zsun.mk b/target/linux/ar71xx/generic/profiles/zsun.mk
+new file mode 100644
+index 0000000..d399846
+--- /dev/null
++++ b/target/linux/ar71xx/generic/profiles/zsun.mk
+@@ -0,0 +1,17 @@
++#
++# Copyright (C) 2015 OpenWrt.org
++#
++# This is free software, licensed under the GNU General Public License v2.
++# See /LICENSE for more information.
++#
++
++define Profile/ZSUN-SD100
++        NAME:=Zsun SD100
++        PACKAGES:=kmod-usb-core kmod-usb2 kmod-usb-storage
++endef
++
++define Profile/ZSUN-SD100/Description
++        Package set optimized for the Zsun SD100.
++endef
++
++$(eval $(call Profile,ZSUN-SD100))
+diff --git a/target/linux/ar71xx/image/Makefile b/target/linux/ar71xx/image/Makefile
+index 4336697..e45b957 100644
+--- a/target/linux/ar71xx/image/Makefile
++++ b/target/linux/ar71xx/image/Makefile
+@@ -685,6 +685,20 @@ define Device/oolite
+ endef
+ TARGET_DEVICES += oolite
+ 
++define Device/zsun-sd100
++  BOARDNAME := ZSUN-SD100
++  DEVICE_PROFILE := ZSUN-SD100
++  IMAGE_SIZE := 11136k
++  KERNEL_SIZE := 1216k
++  ROOTFS_SIZE := 7040k
++  CONSOLE := ttyATH0,115200
++  MTDPARTS := spi0.0:64k(u-boot),64k(u-boot-env),4992k(firmware)ro,11136k(update),64k(nvram)ro,64k(art)ro,4096k@0xbe0000(recovery),1216k@0xeb0000(kernel),7040k@0x500000(rootfs)
++  IMAGES := kernel.bin rootfs.bin
++  IMAGE/kernel.bin :=  append-kernel $$$$(BLOCKSIZE) | check-size $$$$(KERNEL_SIZE)
++  IMAGE/rootfs.bin := append-rootfs $$$$(BLOCKSIZE) | check-size $$$$(ROOTFS_SIZE)
++endef
++TARGET_DEVICES += zsun-sd100
++
+ rootfs_type=$(patsubst jffs2-%,jffs2,$(patsubst squashfs-%,squashfs,$(1)))
+ 
+ # $(1): rootfs type.
+diff --git a/target/linux/generic/config-3.18 b/target/linux/generic/config-3.18
+index 6038692..ffdd2c4 100644
+--- a/target/linux/generic/config-3.18
++++ b/target/linux/generic/config-3.18
+@@ -2263,7 +2263,7 @@ CONFIG_MTD_ROOTFS_SPLIT=y
+ # CONFIG_MTD_SPINAND_MT29F is not set
+ CONFIG_MTD_SPLIT=y
+ # CONFIG_MTD_SPLIT_FIRMWARE is not set
+-CONFIG_MTD_SPLIT_FIRMWARE_NAME="firmware"
++CONFIG_MTD_SPLIT_FIRMWARE_NAME="unused"
+ # CONFIG_MTD_SPLIT_FIT_FW is not set
+ # CONFIG_MTD_SPLIT_LZMA_FW is not set
+ # CONFIG_MTD_SPLIT_SEAMA_FW is not set
+diff --git a/target/linux/ar71xx/mikrotik/config-default b/target/linux/ar71xx/mikrotik/config-default
+index b8a7bf1..456a766 100644
+--- a/target/linux/ar71xx/mikrotik/config-default
++++ b/target/linux/ar71xx/mikrotik/config-default
+@@ -118,6 +118,7 @@ CONFIG_ATH79_MACH_RBSXTLITE=y
+ # CONFIG_ATH79_MACH_WZR_HP_G300NH2 is not set
+ # CONFIG_ATH79_MACH_WZR_HP_G450H is not set
+ # CONFIG_ATH79_MACH_ZCN_1523H is not set
++# CONFIG_ATH79_MACH_ZSUN_SD100 is not set
+ # CONFIG_ATH79_NVRAM is not set
+ CONFIG_ATH79_ROUTERBOOT=y
+ CONFIG_CMDLINE="rootfstype=yaffs noinitrd"
+diff --git a/target/linux/ar71xx/nand/config-default b/target/linux/ar71xx/nand/config-default
+index 626d676..530011b 100644
+--- a/target/linux/ar71xx/nand/config-default
++++ b/target/linux/ar71xx/nand/config-default
+@@ -75,6 +75,7 @@
+ # CONFIG_ATH79_MACH_WZR_HP_G300NH2 is not set
+ # CONFIG_ATH79_MACH_WZR_HP_G450H is not set
+ # CONFIG_ATH79_MACH_ZCN_1523H is not set
++# CONFIG_ATH79_MACH_ZSUN_SD100 is not set
+ # CONFIG_ATH79_NVRAM is not set
+ CONFIG_CMDLINE="rootfstype=squashfs noinitrd"
+ # CONFIG_IP17XX_PHY is not set
+diff --git a/target/linux/ar71xx/patches-3.18/415-mtd-m25p80-add-w25q128fw.patch b/target/linux/ar71xx/patches-3.18/415-mtd-m25p80-add-w25q128fw.patch
+new file mode 100644
+index 0000000..fb4c70b
+--- /dev/null
++++ b/target/linux/ar71xx/patches-3.18/415-mtd-m25p80-add-w25q128fw.patch
+@@ -0,0 +1,21 @@
++--- a/drivers/mtd/devices/m25p80.c
+++++ b/drivers/mtd/devices/m25p80.c
++@@ -307,7 +307,7 @@ static const struct spi_device_id m25p_i
++ 	{"w25x10"},	{"w25x20"},	{"w25x40"},	{"w25x80"},
++ 	{"w25x16"},	{"w25x32"},	{"w25q32"},	{"w25q32dw"},
++ 	{"w25x64"},	{"w25q64"},	{"w25q80"},	{"w25q80bl"},
++-	{"w25q128"},	{"w25q256"},	{"cat25c11"},
+++	{"w25q128"},    {"w25q128fw"},	{"w25q256"},	{"cat25c11"},
++ 	{"cat25c03"},	{"cat25c09"},	{"cat25c17"},	{"cat25128"},
++ 	{ },
++ };
++--- a/drivers/mtd/spi-nor/spi-nor.c
+++++ b/drivers/mtd/spi-nor/spi-nor.c
++@@ -634,6 +634,7 @@ static const struct spi_device_id spi_no
++ 	{ "w25q80", INFO(0xef5014, 0, 64 * 1024,  16, SECT_4K) },
++ 	{ "w25q80bl", INFO(0xef4014, 0, 64 * 1024,  16, SECT_4K) },
++ 	{ "w25q128", INFO(0xef4018, 0, 64 * 1024, 256, SECT_4K) },
+++	{ "w25q128fw", INFO(0xef6018, 0, 64 * 1024, 256, SECT_4K) },
++ 	{ "w25q256", INFO(0xef4019, 0, 64 * 1024, 512, SECT_4K) },
++ 
++ 	/* Catalyst / On Semiconductor -- non-JEDEC */
+diff --git a/target/linux/ar71xx/patches-3.18/610-MIPS-ath79-openwrt-machines.patch b/target/linux/ar71xx/patches-3.18/610-MIPS-ath79-openwrt-machines.patch
+index 2fa041b..8a8f18e 100644
+--- a/target/linux/ar71xx/patches-3.18/610-MIPS-ath79-openwrt-machines.patch
++++ b/target/linux/ar71xx/patches-3.18/610-MIPS-ath79-openwrt-machines.patch
+@@ -1,6 +1,6 @@
+ --- a/arch/mips/ath79/machtypes.h
+ +++ b/arch/mips/ath79/machtypes.h
+-@@ -16,22 +16,197 @@
++@@ -16,22 +16,198 @@
+  
+  enum ath79_mach_type {
+  	ATH79_MACH_GENERIC = 0,
+@@ -195,6 +195,7 @@
+ +	ATH79_MACH_WZR_450HP2,		/* Buffalo WZR-450HP2 */
+ +	ATH79_MACH_ZCN_1523H_2,		/* Zcomax ZCN-1523H-2-xx */
+ +	ATH79_MACH_ZCN_1523H_5,		/* Zcomax ZCN-1523H-5-xx */
+++	ATH79_MACH_ZSUN_SD100,		/* Zsun SD100 */
+  };
+  
+  #endif /* _ATH79_MACHTYPE_H */
+@@ -1341,7 +1342,7 @@
+  
+  config ATH79_MACH_UBNT_XM
+  	bool "Ubiquiti Networks XM/UniFi boards"
+-@@ -83,6 +1126,106 @@ config ATH79_MACH_UBNT_XM
++@@ -83,6 +1126,116 @@ config ATH79_MACH_UBNT_XM
+  	  Say 'Y' here if you want your kernel to support the
+  	  Ubiquiti Networks XM (rev 1.0) board.
+  
+@@ -1445,10 +1446,20 @@
+ +	select ATH79_DEV_USB
+ +	select ATH79_NVRAM
+ +
+++config ATH79_MACH_ZSUN_SD100
+++	bool "Zsun SD100"
+++	select SOC_AR933X
+++	select ATH79_DEV_ETH
+++	select ATH79_DEV_GPIO_BUTTONS
+++	select ATH79_DEV_LEDS_GPIO
+++	select ATH79_DEV_M25P80
+++	select ATH79_DEV_USB
+++	select ATH79_DEV_WMAC
+++
+  endmenu
+  
+  config SOC_AR71XX
+-@@ -124,7 +1267,10 @@ config ATH79_DEV_DSA
++@@ -124,7 +1277,10 @@ config ATH79_DEV_DSA
+  config ATH79_DEV_ETH
+  	def_bool n
+  
+@@ -1460,7 +1471,7 @@
+  	def_bool n
+  
+  config ATH79_DEV_GPIO_BUTTONS
+-@@ -154,6 +1300,11 @@ config ATH79_PCI_ATH9K_FIXUP
++@@ -154,6 +1310,11 @@ config ATH79_PCI_ATH9K_FIXUP
+  	def_bool n
+  
+  config ATH79_ROUTERBOOT
+@@ -1474,7 +1485,7 @@
+  endif
+ --- a/arch/mips/ath79/Makefile
+ +++ b/arch/mips/ath79/Makefile
+-@@ -38,9 +38,126 @@ obj-$(CONFIG_ATH79_ROUTERBOOT)		+= route
++@@ -38,9 +38,127 @@ obj-$(CONFIG_ATH79_ROUTERBOOT)		+= route
+  #
+  # Machines
+  #
+@@ -1601,6 +1612,7 @@
+ +obj-$(CONFIG_ATH79_MACH_ZCN_1523H)	+= mach-zcn-1523h.o
+ +obj-$(CONFIG_ATH79_MACH_CARAMBOLA2)	+= mach-carambola2.o
+ +obj-$(CONFIG_ATH79_MACH_NBG6716)	+= mach-nbg6716.o
+++obj-$(CONFIG_ATH79_MACH_ZSUN_SD100)	+= mach-zsun-sd100.o
+ --- a/arch/mips/ath79/prom.c
+ +++ b/arch/mips/ath79/prom.c
+ @@ -180,6 +180,12 @@ void __init prom_init(void)
