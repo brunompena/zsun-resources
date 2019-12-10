@@ -1,0 +1,219 @@
+diff --git a/target/linux/ath79/base-files/etc/board.d/02_network b/target/linux/ath79/base-files/etc/board.d/02_network
+index 746cb61..2fbb748 100755
+--- a/target/linux/ath79/base-files/etc/board.d/02_network
++++ b/target/linux/ath79/base-files/etc/board.d/02_network
+@@ -44,7 +44,8 @@ ath79_setup_interfaces()
+ 	ubnt,unifiac-mesh|\
+ 	ubnt,unifi|\
+ 	wd,mynet-wifi-rangeextender|\
+-	winchannel,wb2000)
++	winchannel,wb2000|\
++	zsun,sd100)
+ 		ucidef_set_interface_lan "eth0"
+ 		;;
+ 	avm,fritz4020|\
+diff --git a/target/linux/ath79/base-files/etc/rc.button/BTN_0 b/target/linux/ath79/base-files/etc/rc.button/BTN_0
+new file mode 100644
+index 0000000..ae74e1f
+--- /dev/null
++++ b/target/linux/ath79/base-files/etc/rc.button/BTN_0
+@@ -0,0 +1,15 @@
++#!/bin/sh
++
++case "$ACTION" in
++pressed)
++	logger -t sdcard_event "SD Card inserted"
++	echo 1 > /sys/class/gpio/sdreader_reset/value
++	echo 0 > /sys/class/gpio/sdreader_reset/value
++	;;
++released)
++	logger -t sdcard_event "SD Card removed"
++	echo 1 > /sys/class/gpio/sdreader_reset/value
++	;;
++esac
++
++return 0
+diff --git a/target/linux/ath79/base-files/etc/uci-defaults/99_enable-wifi b/target/linux/ath79/base-files/etc/uci-defaults/99_enable-wifi
+new file mode 100644
+index 0000000..ce93778
+--- /dev/null
++++ b/target/linux/ath79/base-files/etc/uci-defaults/99_enable-wifi
+@@ -0,0 +1,6 @@
++#!/bin/sh
++
++uci set wireless.@wifi-device[0].disabled=0
++uci commit wireless
++
++exit 0
+diff --git a/target/linux/ath79/dts/ar9331_zsun_sd100.dts b/target/linux/ath79/dts/ar9331_zsun_sd100.dts
+new file mode 100644
+index 0000000..263f7e6
+--- /dev/null
++++ b/target/linux/ath79/dts/ar9331_zsun_sd100.dts
+@@ -0,0 +1,149 @@
++// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
++/dts-v1/;
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/input.h>
++
++#include "ar9331.dtsi"
++
++/ {
++	model = "Zsun SD100";
++	compatible = "zsun,sd100", "qca,ar9331";
++
++	aliases {
++		led-boot = &status;
++		led-failsafe = &status;
++		led-running = &status;
++		led-upgrade = &status;
++		serial0 = &uart;
++		label-mac-device = &wmac;
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		status: status {
++			label = "sd100:green:status";
++			gpios = <&gpio 0 GPIO_ACTIVE_HIGH>;
++			default-state = "on";
++		};
++	};
++
++	keys {
++		compatible = "gpio-keys-polled";
++		poll-interval = <20>;
++
++		sdcard_event {
++			label = "sdcard_event";
++			linux,code = <BTN_0>;
++			gpios = <&gpio 22 GPIO_ACTIVE_LOW>;
++			debounce-interval = <60>;
++		};
++	};
++
++	gpio-export {
++		compatible = "gpio-export";
++
++		sdreader_reset {
++			gpio-export,name = "sdreader_reset";
++			gpio-export,output = <1>;
++			gpios = <&gpio 18 GPIO_ACTIVE_LOW>;
++		};
++
++		sdreader_switch {
++			gpio-export,name = "sdreader_switch";
++			gpio-export,output = <0>;
++			gpios = <&gpio 21 GPIO_ACTIVE_HIGH>;
++		};
++	};
++};
++
++&spi {
++	status = "okay";
++	num-chipselects = <0>;
++
++	flash@0 {
++		compatible = "jedec,spi-nor";
++		spi-max-frequency = <104000000>;
++		reg = <0>;
++
++		partitions {
++			compatible = "fixed-partitions";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			u_boot: partition@0 {
++				label = "u-boot";
++				reg = <0x000000 0x010000>;
++				read-only;
++			};
++
++			u_boot_env: partition@10000 {
++				label = "u-boot-env";
++				reg = <0x010000 0x010000>;
++				read-only;
++			};
++
++			firmware: partition@20000 {
++				compatible = "denx,uimage";
++				label = "firmware";
++				reg = <0x020000 0xbc0000>;
++			};
++
++			recovery: partition@be0000 {
++				label = "recovery";
++				reg = <0xbe0000 0x400000>;
++				read-only;
++			};
++
++			nvram: partition@fe0000 {
++				label = "nvram";
++				reg = <0xfe0000 0x010000>;
++				read-only;
++			};
++
++			art: partition@ff0000 {
++				label = "art";
++				reg = <0xff0000 0x010000>;
++				read-only;
++			};
++		};
++	};
++};
++
++&uart {
++	status = "okay";
++};
++
++&gpio {
++	status = "okay";
++};
++
++&usb {
++	status = "okay";
++	compatible = "generic-ehci";
++	reg = <0x1b000000 0x1000>;
++
++	has-transaction-translator;
++	caps-offset = <0x100>;
++};
++
++&usb_phy {
++	status = "okay";
++};
++
++&eth0 {
++	status = "disabled";
++	mtd-mac-address = <&art 0x0>;
++};
++
++&eth1 {
++	status = "disabled";
++	mtd-mac-address = <&art 0x6>;
++};
++
++&wmac {
++	status = "okay";
++	mtd-cal-data = <&art 0x1000>;
++	mtd-mac-address = <&art 0x1002>;
++};
+diff --git a/target/linux/ath79/image/generic.mk b/target/linux/ath79/image/generic.mk
+index 29a67de..5ea5e87 100644
+--- a/target/linux/ath79/image/generic.mk
++++ b/target/linux/ath79/image/generic.mk
+@@ -751,3 +751,12 @@ define Device/zbtlink_zbt-wd323
+ 		     kmod-usb-serial kmod-usb-serial-cp210x uqmi
+ endef
+ TARGET_DEVICES += zbtlink_zbt-wd323
++
++define Device/zsun_sd100
++  ATH_SOC := ar9331
++  DEVICE_TITLE := Zsun SD100
++  DEVICE_PACKAGES := kmod-usb2 kmod-usb-storage
++  IMAGE_SIZE := 12032k
++  SUPPORTED_DEVICES += zsun-sd100
++endef
++TARGET_DEVICES += zsun_sd100
