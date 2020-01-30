@@ -61,6 +61,7 @@ Then compare its output with the following table to identify the firmware:
 | ------ | ------- |
 | c10cba35a7eea4ddde8534dd0c9a48fa | Original Firmware |
 | fb97079eb3bd5feffb080e5be71574ea | Emeryth 15.05.0 Firmware |
+| 471167cedc5bdaa9fb56d97f52f662d7 | maurer 17.01.4 Firmware |
 | 6ac5a0c1c919bd49d56205c9abd8b51d | puteulanus 17.01.6 Firmware |
 | 46cc21d44db073f99efe9ecd6437d25a | puteulanus 18.06.1 Firmware |
 | 37e381cbb2c9e7660442e1525b3c3c58 | puteulanus 18.06.1_rec Firmware |
@@ -77,6 +78,8 @@ Download the corresponding files for your firmware version:
 | Original Firmware (part2) | [zsun-sd100.update.variant1.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part2.bin) |
 | Emeryth 15.05.0 Firmware (part1) | [zsun-sd100.update.variant1.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part1.bin) |
 | Emeryth 15.05.0 Firmware (part2) | [zsun-sd100.update.variant1.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part2.bin) |
+| maurer 17.01.4 Firmware (part1) | [zsun-sd100.update.variant1.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part1.bin) |
+| maurer 17.01.4 Firmware (part2) | [zsun-sd100.update.variant1.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part2.bin) |
 | puteulanus 17.01.6 Firmware (part1) | [zsun-sd100.update.variant1.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part1.bin) |
 | puteulanus 17.01.6 Firmware (part2) | [zsun-sd100.update.variant1.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part2.bin) |
 | puteulanus 18.06.1 Firmware (part1) | [zsun-sd100.update.variant2.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant2.part1.bin) |
