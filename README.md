@@ -46,6 +46,7 @@ The update process for Zsun-SD100 can be summarized as follows:
  3. Prepare the device to be updated
  4. Flash the update files
  5. Wait for the update process to complete
+ 6. Verify recovery image
 
 ## Identify current firmware
 
@@ -180,13 +181,95 @@ If everything goes according to plan your device will go through the following s
 	- *will automatically flash the recovery image (overwriting the update kernel)*
 	- *will automatically reboot once done*
  3. Boot to the main firmware
-	- *will automatically* initialize its rootfs_data (overwriting the update rootfs)*
+	- *will automatically initialize its rootfs_data (overwriting the update rootfs)*
 
 While the update image is running you'll see a WiFi SSID: ***Zsun is Updating! Please wait...***.
 
 Once the LED on your Zsun-SD100 stops flashing you should see a new WiFi SSID: ***OpenWrt***.
 
 The entire process should take about 2min - be patient and wait until it finishes.
+
+## Verify recovery image
+
+Devices like the Zsun-SD100 are very unforgiving when it comes to mistakes, making it very easy to brick the device.
+
+This is why it is **imperative to make sure your recovery image is in good conditions before starting to customize your main firmware**.
+
+You only need to do this once, _ideally on the first boot of the main firmware (after the update image finished all of its steps)_.
+
+### Check recovery image integrity
+
+During the flash of the update image parts you have overwritten all of the data of the operating system that was running at that time, and although precautions were taken to avoid data corruption *there's still a small chance of this happening*.
+
+Check the integrity of the recovery image by running and comparing the output of the following command:
+```
+md5sum /dev/mtd6
+```
+
+| MTD Partition | md5sum |
+| ------------- | ------ |
+| /dev/mtd6 | b8e5722762408a2b0520a95189e3e4bc |
+
+If your md5sum matches then your recovery image is okay and you may continue to [Boot to recovery](#boot-to-recovery) to try it out!
+
+If your md5sum doesn't match the one you see above then your recovery image is corrupted and you must reflash it.
+
+### Reflash recovery image
+
+Reflashing the recovery image is a very straight forward process:
+ 1. Download the mtd-rw kernel module
+ 2. Download the recovery image
+ 3. Flash the recovery image
+
+#### Download the mtd-rw kernel module
+
+The recovery image is stored on a read-only partition, so before flashing it you need to change the partition to read-write.
+
+This is done by installing and loading the mtd-rw kernel module that changes all partitions to read-write.
+
+Download the mtd-rw kernel module for your OpenWrt version:
+
+| Version | mtd-rw kernel module |
+| ------- | ------------------ |
+| OpenWrt 19.07.0-rc1 | [kmod-mtd-rw_4.14.151+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/v1.0/kmod-mtd-rw_4.14.151+git-20160214-1_mips_24kc.ipk) |
+| OpenWrt 19.07.0-rc2 | [kmod-mtd-rw_4.14.156+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc2/kmod-mtd-rw_4.14.156+git-20160214-1_mips_24kc.ipk) |
+| OpenWrt 19.07.0 | [kmod-mtd-rw_4.14.162+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.0/kmod-mtd-rw_4.14.162+git-20160214-1_mips_24kc.ipk) |
+
+Copy the file to the `/tmp` directory of your Zsun-SD100 and then use the following command to install it:
+```
+opkg install /tmp/kmod-mtd-rw_*.ipk
+```
+
+Finally, load the mtd-rw kernel module to change all partitions to read-write:
+```
+insmod $(find /lib/modules/ -name mtd-rw.ko) i_want_a_brick=1
+```
+
+#### Download the recovery image
+
+Download the recovery image:
+
+| Recovery Image | md5sum |
+| -------------- | ------ |
+| [zsun-sd100.recovery.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.recovery.bin) | b8e5722762408a2b0520a95189e3e4bc |
+
+Then copy it to the `/tmp` directory of your Zsun-SD100 and check its md5sum:
+```
+md5sum /tmp/zsun-sd100.recovery.bin
+```
+
+If your md5sum doesn't match the one you see on the table then **delete the file and download it again!**
+
+#### Flash the recovery image
+
+You are now ready to reflash your recovery image!
+
+Execute the command:
+```
+mtd write /tmp/zsun-sd100.recovery.bin recovery
+```
+
+Once it finishes go back to the [Check recovery image integrity](#check-recovery-image-integrity) section to verify its integrity once again.
 
 # Recovery Image
 
