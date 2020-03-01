@@ -210,7 +210,7 @@ md5sum /dev/mtd6
 | ------------- | ------ |
 | /dev/mtd6 | b8e5722762408a2b0520a95189e3e4bc |
 
-If your md5sum matches then your recovery image is okay and you may continue to [Boot to recovery](#boot-to-recovery) to try it out!
+If your md5sum matches then your recovery image was successfully flashed and you may continue to [Recovery Image](#recovery-image) to test it.
 
 If your md5sum doesn't match the one you see above then your recovery image is corrupted and you must reflash it.
 
@@ -234,6 +234,8 @@ Download the mtd-rw kernel module for your OpenWrt version:
 | OpenWrt 19.07.0-rc1 | [kmod-mtd-rw_4.14.151+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/v1.0/kmod-mtd-rw_4.14.151+git-20160214-1_mips_24kc.ipk) |
 | OpenWrt 19.07.0-rc2 | [kmod-mtd-rw_4.14.156+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc2/kmod-mtd-rw_4.14.156+git-20160214-1_mips_24kc.ipk) |
 | OpenWrt 19.07.0 | [kmod-mtd-rw_4.14.162+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.0/kmod-mtd-rw_4.14.162+git-20160214-1_mips_24kc.ipk) |
+| OpenWrt 19.07.1 | [kmod-mtd-rw_4.14.167+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.1/kmod-mtd-rw_4.14.167+git-20160214-1_mips_24kc.ipk) |
+| OpenWrt 19.07.2 | [kmod-mtd-rw_4.14.171+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.2/kmod-mtd-rw_4.14.171+git-20160214-1_mips_24kc.ipk) |
 
 Copy the file to the `/tmp` directory of your Zsun-SD100 and then use the following command to install it:
 ```
@@ -249,14 +251,17 @@ insmod $(find /lib/modules/ -name mtd-rw.ko) i_want_a_brick=1
 
 Download the recovery image:
 
-| Recovery Image | md5sum |
-| -------------- | ------ |
-| [zsun-sd100.recovery.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.recovery.bin) | b8e5722762408a2b0520a95189e3e4bc |
+| Version | Recovery Image |
+| ------- | -------------- |
+| Recovery Image 18.06.5 | [zsun-sd100.recovery.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.recovery.bin) |
 
 Then copy it to the `/tmp` directory of your Zsun-SD100 and check its md5sum:
 ```
 md5sum /tmp/zsun-sd100.recovery.bin
 ```
+| Recovery Image | md5sum |
+| -------------- | ------ |
+| zsun-sd100.recovery.bin | b8e5722762408a2b0520a95189e3e4bc |
 
 If your md5sum doesn't match the one you see on the table then **delete the file and download it again!**
 
