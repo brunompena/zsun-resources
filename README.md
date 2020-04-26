@@ -1,19 +1,11 @@
 # Introduction
 
-This repository contains all the information needed to update the firmware of Zsun-SD100 to OpenWrt version 19.07.0-rc1.
-It was created to complement the push requests to have Zsun-SD100 officially supported on both OpenWrt and u-boot_mod:
- - [OpenWrt: add support for Zsun-SD100 on ar71xx](https://github.com/openwrt/openwrt/pull/2568)
- - [OpenWrt: add support for Zsun-SD100 on ath79](https://github.com/openwrt/openwrt/pull/2569)
- - [u-boot_mod: add support for Zsun-SD100](https://github.com/pepe2k/u-boot_mod/pull/236)
-
-Other patches relevant to this release:
- - [Kernel: make mtd sub-partitions inherit parent's access mode](https://github.com/openwrt/openwrt/pull/2535)
- - [fstools: allow mounting of read-only mtd partitions](http://lists.infradead.org/pipermail/openwrt-devel/2019-November/019860.html)
+This repository contains all the information needed to update the firmware of Zsun-SD100 to OpenWrt version 19.07.
 
 ## Main features
 
 These are the main features of this release when compared to other community releases:
- - Firmware image based on OpenWrt 19.07.0-rc1
+ - Firmware image based on OpenWrt 19.07
 	- *the latest and greatest release based on the new ath79 architecture*
  - Recovery image based on OpenWrt 18.06.5 (no more bricking!)
 	- *using the tested and proven ar71xx architecture*
