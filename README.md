@@ -39,6 +39,7 @@ The update process for Zsun-SD100 can be summarized as follows:
  4. Flash the update files
  5. Wait for the update process to complete
  6. Verify recovery image
+ 7. Flash the latest version
 
 ## Identify current firmware
 
@@ -202,7 +203,7 @@ md5sum /dev/mtd6
 | ------------- | ------ |
 | /dev/mtd6 | b8e5722762408a2b0520a95189e3e4bc |
 
-If your md5sum matches then your recovery image was successfully flashed and you may continue to [Recovery Image](#recovery-image) to test it.
+If your md5sum matches then your recovery image was successfully flashed and you may continue to [Recovery Image](#recovery-image) if you want to test it.
 
 If your md5sum doesn't match the one you see above then your recovery image is corrupted and you must reflash it.
 
@@ -268,6 +269,12 @@ mtd write /tmp/zsun-sd100.recovery.bin recovery
 ```
 
 Once it finishes go back to the [Check recovery image integrity](#check-recovery-image-integrity) section to verify its integrity once again.
+
+## Flash the latest version
+
+The update image includes OpenWrt 19.07.0-rc1 which is already outdated.
+
+You may flash the latest version found on [Releases](https://github.com/brunompena/zsun-resources/releases) as long as you follow the release instructions for using the *Recovery Image (CLI)* and **without** preserving any settings!
 
 # Recovery Image
 
