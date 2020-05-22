@@ -228,6 +228,7 @@ Download the mtd-rw kernel module for your OpenWrt version:
 | OpenWrt 19.07.0 | [kmod-mtd-rw_4.14.162+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.0/kmod-mtd-rw_4.14.162+git-20160214-1_mips_24kc.ipk) |
 | OpenWrt 19.07.1 | [kmod-mtd-rw_4.14.167+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.1/kmod-mtd-rw_4.14.167+git-20160214-1_mips_24kc.ipk) |
 | OpenWrt 19.07.2 | [kmod-mtd-rw_4.14.171+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.2/kmod-mtd-rw_4.14.171+git-20160214-1_mips_24kc.ipk) |
+| OpenWrt 19.07.3 | [kmod-mtd-rw_4.14.180+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.3/kmod-mtd-rw_4.14.180+git-20160214-1_mips_24kc.ipk) |
 
 Copy the file to the `/tmp` directory of your Zsun-SD100 and then use the following command to install it:
 ```
