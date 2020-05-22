@@ -274,7 +274,7 @@ Once it finishes go back to the [Check recovery image integrity](#check-recovery
 
 The update image includes OpenWrt 19.07.0-rc1 which is already outdated.
 
-You may flash the latest version found on [Releases](https://github.com/brunompena/zsun-resources/releases) as long as you follow the release instructions for using the *Recovery Image (CLI)* and **without** preserving any settings!
+You may flash the latest version found on [Releases](https://github.com/brunompena/zsun-resources/releases) directly on top of 19.07.0-rc1, as long as you follow the release instructions for using the *Recovery Image (CLI)* and **without** preserving any settings!
 
 # Recovery Image
 
