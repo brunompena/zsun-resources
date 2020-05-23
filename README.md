@@ -337,15 +337,14 @@ All images have been compiled using a clean installation of Ubuntu Server 16.04:
 sudo apt install build-essential python libncurses5-dev libssl-dev zlib1g-dev
 sudo apt install gawk gettext unzip subversion git
 ```
-
-## Compile images
-
-Start by cloning this repository so you have all patches available on your environment:
+  3. Clone this repository so you have all patches available on your environment:
 ```
 git clone https://github.com/brunompena/zsun-resources.git
 ```
 
-Then follow the below instructions for each image.
+## Compile images
+
+Follow the below instructions for each image type.
 
 ### U-Boot
 
@@ -402,3 +401,32 @@ make defconfig
 cp ../zsun-resources/zsun-sd100.update.ar71xx[v15.05.1].config .config
 make -j$(nproc)
 ```
+
+## Image Builder
+
+On this repository you can also find patches to add support for Zsun-SD100 to the official OpenWrt Image Builder.
+
+To use these patches, start by customizing the below environment variables:
+```
+IMAGEBUILDER_VERSION="19.07.0"    # OpenWrt version to build
+IMAGEBUILDER_PACKAGES=""          # List of packages to add/remove (see official documentation for details)
+```
+
+Then execute the following commands to build your image:
+```
+IMAGEBUILDER_PATCH="$(pwd)/zsun-resources/zsun-sd100.imagebuilder.ath79[v${IMAGEBUILDER_VERSION}].patch"
+IMAGEBUILDER_NAME="openwrt-imagebuilder-${IMAGEBUILDER_VERSION}-ath79-generic.Linux-x86_64"
+IMAGEBUILDER_URL="https://downloads.openwrt.org/releases/${IMAGEBUILDER_VERSION}/targets/ath79/generic/${IMAGEBUILDER_NAME}.tar.xz"
+IMAGEBUILDER_IMAGE="$(pwd)/${IMAGEBUILDER_NAME}/bin/targets/ath79/generic/openwrt-${IMAGEBUILDER_VERSION}-ath79-generic-zsun_sd100-squashfs-sysupgrade.bin"
+
+wget -qO- "${IMAGEBUILDER_URL}" | tar xJvf -
+cd "${IMAGEBUILDER_NAME}"
+
+patch -p1 < "${IMAGEBUILDER_PATCH}"
+find files/ -type f -exec chmod 0755 {} \;
+
+make image PROFILE="zsun_sd100" FILES="files/" PACKAGES="${IMAGEBUILDER_PACKAGES}" && \
+echo -e "\n\nOpenWrt image was built successfully and can be found at:\n  ${IMAGEBUILDER_IMAGE}\n\n"
+```
+
+Once your customized image is built, you can then use any of the standard methods to flash it.
