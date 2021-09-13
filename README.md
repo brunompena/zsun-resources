@@ -230,6 +230,16 @@ Download the mtd-rw kernel module for your OpenWrt version:
 | OpenWrt 19.07.1 | [kmod-mtd-rw_4.14.167+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.1/kmod-mtd-rw_4.14.167+git-20160214-1_mips_24kc.ipk) |
 | OpenWrt 19.07.2 | [kmod-mtd-rw_4.14.171+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.2/kmod-mtd-rw_4.14.171+git-20160214-1_mips_24kc.ipk) |
 | OpenWrt 19.07.3 | [kmod-mtd-rw_4.14.180+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.3/kmod-mtd-rw_4.14.180+git-20160214-1_mips_24kc.ipk) |
+| OpenWrt 19.07.4 | [kmod-mtd-rw_4.14.195+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.4/kmod-mtd-rw_4.14.195+git-20160214-1_mips_24kc.ipk) |
+| OpenWrt 19.07.5 | [kmod-mtd-rw_4.14.209+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.5/kmod-mtd-rw_4.14.209+git-20160214-1_mips_24kc.ipk) |
+| OpenWrt 19.07.6 | [kmod-mtd-rw_4.14.215+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.6/kmod-mtd-rw_4.14.215+git-20160214-1_mips_24kc.ipk) |
+| OpenWrt 19.07.7 | [kmod-mtd-rw_4.14.221+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.7/kmod-mtd-rw_4.14.221+git-20160214-1_mips_24kc.ipk) |
+| OpenWrt 19.07.8 | [kmod-mtd-rw_4.14.241+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.8/kmod-mtd-rw_4.14.241+git-20160214-1_mips_24kc.ipk) |
+| OpenWrt 21.02.0-rc1 | [kmod-mtd-rw_5.4.111+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/21.02.0-rc1/kmod-mtd-rw_5.4.111+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 21.02.0-rc2 | [kmod-mtd-rw_5.4.119+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/21.02.0-rc2/kmod-mtd-rw_5.4.119+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 21.02.0-rc3 | [kmod-mtd-rw_5.4.124+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/21.02.0-rc3/kmod-mtd-rw_5.4.124+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 21.02.0-rc4 | [kmod-mtd-rw_5.4.137+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/21.02.0-rc4/kmod-mtd-rw_5.4.137+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 21.02.0 | [kmod-mtd-rw_5.4.143+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/21.02.0/kmod-mtd-rw_5.4.143+git-20160214-2_mips_24kc.ipk) |
 
 Copy the file to the `/tmp` directory of your Zsun-SD100 and then use the following command to install it:
 ```
@@ -331,7 +341,7 @@ Below you'll find instructions on how to build each of the images you find on th
 ## Build environment
 
 All images have been compiled using a clean installation of Ubuntu Server 16.04:
-  1. Install Ubuntu Server 16.04 on a VM using the official [Network Installer](https://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/mini.iso) image.
+  1. Install Ubuntu Server 16.04 on a VM using the official [Network Installer](http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/mini.iso) image.
   2. Once done, install the required build dependencies:
 ```
 sudo apt install build-essential python libncurses5-dev libssl-dev zlib1g-dev
