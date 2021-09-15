@@ -278,11 +278,11 @@ mtd write /tmp/zsun-sd100.recovery.bin recovery
 
 Once it finishes go back to the [Check recovery image integrity](#check-recovery-image-integrity) section to verify its integrity once again.
 
-## Update to the latest versions
+## Flash the latest versions
 
 The update image includes OpenWrt 19.07.0-rc1 as the main firmware and OpenWrt 18.06.5 as the recovery firmware, both of which are already outdated.
 
-You may update to the latest versions found on [Releases](https://github.com/brunompena/zsun-resources/releases) as long as you follow the release instructions to upgrade **without** preserving any settings!
+You may upgrade to the latest versions found on [Releases](https://github.com/brunompena/zsun-resources/releases) as long as you follow the release instructions to upgrade **without** preserving any settings!
 
 # Recovery Image
 
@@ -310,16 +310,25 @@ This is done using the `mount-firmware` script included on the recovery image.
 
 To mount your main firmware execute:
 ```
+# For Recovery Image 18.06.5:
+mount_firmware
+
+# For Recovery Image 19.07.8:
 mount-firmware
 ```
 
 To unmount your main firmware execute:
 ```
+# For Recovery Image 18.06.5:
+umount_firmware
+
+# For Recovery Image 19.07.8:
 umount-firmware
 ```
 
 To reset the main firmware (delete all changes done to it) execute:
 ```
+# For Recovery Image 19.07.8:
 reset-firmware
 ```
 
@@ -338,6 +347,22 @@ mtd-rw unlock
 ```
 
 *All partitions will be locked again on the next reboot.*
+
+## Save changes to recovery
+
+The new recovery image 19.07.8 is capable of persisting changes.
+
+To save all changes done to the recovery:
+```
+recovery-config save
+```
+
+To reset all saved changes:
+```
+recovery-config reset
+```
+
+*Please be aware the amount of space available for storing changes is very limited!*
 
 # Build guide
 
