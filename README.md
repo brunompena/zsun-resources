@@ -1,16 +1,16 @@
+
 # Introduction
 
-This repository contains all the information needed to update the firmware of Zsun-SD100 to OpenWrt version 19.07.
+This repository contains all the information needed to update the firmware of Zsun-SD100 to OpenWrt version 21.02.
 
 ## Main features
 
 These are the main features of this release when compared to other community releases:
- - Firmware image based on OpenWrt 19.07
-	- *the latest and greatest release based on the new ath79 architecture*
- - Recovery image based on OpenWrt 18.06.5 (no more bricking!)
-	- *using the tested and proven ar71xx architecture*
-	- *with 4MB size to fit newer OpenWrt releases*
-	- *read-only partition so it can't be damaged*
+ - Firmware image based on OpenWrt 21.02
+	- *the latest and greatest release*
+ - Recovery image based on OpenWrt 19.07 (no more bricking!)
+	- *the old-stable branch which introduced the new ath79 architecture*
+	- *read-only partition with so it can't be damaged*
  - Updated u-boot to accommodate future OpenWrt releases
 	- *changed kernel boot offset to the start of the flash memory*
  - Built with reviewed and tweaked community patches
@@ -39,7 +39,7 @@ The update process for Zsun-SD100 can be summarized as follows:
  4. Flash the update files
  5. Wait for the update process to complete
  6. Verify recovery image
- 7. Flash the latest version
+ 7. Update to the latest versions
 
 ## Identify current firmware
 
@@ -188,8 +188,6 @@ Devices like the Zsun-SD100 are very unforgiving when it comes to mistakes, maki
 
 This is why it is **imperative to make sure your recovery image is in good conditions before starting to customize your main firmware**.
 
-You only need to do this once, _ideally on the first boot of the main firmware (after the update image finished all of its steps)_.
-
 ### Check recovery image integrity
 
 During the flash of the update image parts you have overwritten all of the data of the operating system that was running at that time, and although precautions were taken to avoid data corruption *there's still a small chance of this happening*.
@@ -280,11 +278,11 @@ mtd write /tmp/zsun-sd100.recovery.bin recovery
 
 Once it finishes go back to the [Check recovery image integrity](#check-recovery-image-integrity) section to verify its integrity once again.
 
-## Flash the latest version
+## Update to the latest versions
 
-The update image includes OpenWrt 19.07.0-rc1 which is already outdated.
+The update image includes OpenWrt 19.07.0-rc1 as the main firmware and OpenWrt 18.06.5 as the recovery firmware, both of which are already outdated.
 
-You may flash the latest version found on [Releases](https://github.com/brunompena/zsun-resources/releases) directly on top of 19.07.0-rc1, as long as you follow the release instructions for using the *Recovery Image (CLI)* and **without** preserving any settings!
+You may update to the latest versions found on [Releases](https://github.com/brunompena/zsun-resources/releases) as long as you follow the release instructions to upgrade **without** preserving any settings!
 
 # Recovery Image
 
@@ -308,19 +306,22 @@ If you successfully triggered the recovery image then after a few seconds you'll
 
 A very useful feature of the recovery image is that allows you to mount your main firmware so you may fix any configuraton issues.
 
-This is done using the [mount_firmware](https://github.com/brunompena/mount_firmware) script included on the recovery image.
+This is done using the `mount-firmware` script included on the recovery image.
 
 To mount your main firmware execute:
 ```
-mount_firmware
+mount-firmware
 ```
 
-To unmount and commit your changes execute:
+To unmount your main firmware execute:
 ```
-umount_firmware
+umount-firmware
 ```
 
-*Please note that your firmware filesystem is mounted in memory! Changes will only be commited to flash when you unmount it!*
+To reset the main firmware (delete all changes done to it) execute:
+```
+reset-firmware
+```
 
 ## Unlocking mtd partitions
 
@@ -329,7 +330,11 @@ All mtd partitions - except firmware - are marked as read-only to avoid accident
 However, it is possible to unlock them if needed by executing the following command while on the **recovery image**:
 
 ```
+# For Recovery Image 18.06.5:
 insmod $(find /lib/modules/ -name mtd-rw.ko) i_want_a_brick=1
+
+# For Recovery Image 19.07.8:
+mtd-rw unlock
 ```
 
 *All partitions will be locked again on the next reboot.*
