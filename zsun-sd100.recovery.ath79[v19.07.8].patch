@@ -1,0 +1,660 @@
+diff --git a/package/base-files/files/bin/config_generate b/package/base-files/files/bin/config_generate
+index 3bf48d7..a2213fe 100755
+--- a/package/base-files/files/bin/config_generate
++++ b/package/base-files/files/bin/config_generate
+@@ -70,8 +70,6 @@ generate_network() {
+ 		json_select ..
+ 	json_select ..
+ 
+-	[ -n "$ifname" ] || return
+-
+ 	# force bridge for multi-interface devices (and lan)
+ 	case "$1:$ifname" in
+ 		*\ * | lan:*) type="bridge" ;;
+diff --git a/package/base-files/files/etc/board.d/99-default_network b/package/base-files/files/etc/board.d/99-default_network
+index d70aa35..a091f3f 100755
+--- a/package/base-files/files/etc/board.d/99-default_network
++++ b/package/base-files/files/etc/board.d/99-default_network
+@@ -9,7 +9,8 @@ board_config_update
+ 
+ json_is_a network object && exit 0
+ 
+-ucidef_set_interface_lan 'eth0'
++ucidef_set_interface 'lan'
++[ -d /sys/class/net/eth0 ] && ucidef_set_interface_lan 'eth0'
+ [ -d /sys/class/net/eth1 ] && ucidef_set_interface_wan 'eth1'
+ 
+ board_config_flush
+diff --git a/package/system/fstools/patches/001-add-support-for-readonly-mtd.patch b/package/system/fstools/patches/001-add-support-for-readonly-mtd.patch
+new file mode 100644
+index 0000000..9a24f4e
+--- /dev/null
++++ b/package/system/fstools/patches/001-add-support-for-readonly-mtd.patch
+@@ -0,0 +1,46 @@
++--- a/libfstools/mtd.c
+++++ b/libfstools/mtd.c
++@@ -36,20 +36,31 @@ struct mtd_volume {
++ 
++ static struct driver mtd_driver;
++ 
+++static int mtd_open_device(const char *dev)
+++{
+++	int ret;
+++
+++	ret = open(dev, O_RDWR | O_SYNC);
+++	if (ret < 0)
+++		ret = open(dev, O_RDONLY);
+++
+++	return ret;
+++}
+++
++ static int mtd_open(const char *mtd, int block)
++ {
++ 	FILE *fp;
++ 	char dev[PATH_MAX];
++-	int i, ret, flags = O_RDWR | O_SYNC;
+++	int i, ret;
++ 
++ 	if ((fp = fopen("/proc/mtd", "r"))) {
++ 		while (fgets(dev, sizeof(dev), fp)) {
++ 			if (sscanf(dev, "mtd%d:", &i) && strstr(dev, mtd)) {
++ 				snprintf(dev, sizeof(dev), "/dev/mtd%s/%d", (block ? "block" : ""), i);
++-				ret = open(dev, flags);
+++				ret = mtd_open_device(dev);
++ 				if (ret < 0) {
++ 					snprintf(dev, sizeof(dev), "/dev/mtd%s%d", (block ? "block" : ""), i);
++-					ret = open(dev, flags);
+++					ret = mtd_open_device(dev);
++ 				}
++ 				fclose(fp);
++ 				return ret;
++@@ -58,7 +70,7 @@ static int mtd_open(const char *mtd, int block)
++ 		fclose(fp);
++ 	}
++ 
++-	return open(mtd, flags);
+++	return mtd_open_device(mtd);
++ }
++ 
++ static void mtd_volume_close(struct mtd_volume *p)
+diff --git a/target/linux/ath79/base-files/etc/board.d/02_network b/target/linux/ath79/base-files/etc/board.d/02_network
+index 5dda551..75dfa8f 100755
+--- a/target/linux/ath79/base-files/etc/board.d/02_network
++++ b/target/linux/ath79/base-files/etc/board.d/02_network
+@@ -286,6 +286,8 @@ ath79_setup_interfaces()
+ 		ucidef_add_switch "switch0" \
+ 			"0@eth0" "3:lan:1" "4:lan:2"
+ 		;;
++	zsun,sd100-recovery)
++		;;
+ 	*)
+ 		ucidef_set_interfaces_lan_wan "eth0" "eth1"
+ 		;;
+diff --git a/target/linux/ath79/base-files/etc/rc.button/BTN_0 b/target/linux/ath79/base-files/etc/rc.button/BTN_0
+new file mode 100755
+index 0000000..ae74e1f
+--- /dev/null
++++ b/target/linux/ath79/base-files/etc/rc.button/BTN_0
+@@ -0,0 +1,15 @@
++#!/bin/sh
++
++case "$ACTION" in
++pressed)
++	logger -t sdcard_event "SD Card inserted"
++	echo 1 > /sys/class/gpio/sdreader_reset/value
++	echo 0 > /sys/class/gpio/sdreader_reset/value
++	;;
++released)
++	logger -t sdcard_event "SD Card removed"
++	echo 1 > /sys/class/gpio/sdreader_reset/value
++	;;
++esac
++
++return 0
+diff --git a/target/linux/ath79/base-files/etc/uci-defaults/95_enable-wifi b/target/linux/ath79/base-files/etc/uci-defaults/95_enable-wifi
+new file mode 100644
+index 0000000..853b7cf
+--- /dev/null
++++ b/target/linux/ath79/base-files/etc/uci-defaults/95_enable-wifi
+@@ -0,0 +1,8 @@
++#!/bin/sh
++
++[ ! -z "$(uci -q get network.lan.ifname)" ] && exit 0
++
++uci set wireless.@wifi-device[0].disabled=0
++uci commit wireless
++
++exit 0
+diff --git a/target/linux/ath79/base-files/etc/uci-defaults/99_zsun-recovery b/target/linux/ath79/base-files/etc/uci-defaults/99_zsun-recovery
+new file mode 100644
+index 0000000..82bcf11
+--- /dev/null
++++ b/target/linux/ath79/base-files/etc/uci-defaults/99_zsun-recovery
+@@ -0,0 +1,19 @@
++#!/bin/sh
++
++# create "main firmware" mountpoint
++mkdir -p /firmware
++
++# remove "main firmware" specific binaries
++rm -f /sbin/jffs2mark /sbin/jffs2reset
++rm -f /sbin/firstboot /sbin/sysupgrade
++
++# configure system hostname
++uci set system.@system[0].hostname='Zsun-SD100'
++uci commit system
++
++# configure wireless ssid
++uci set wireless.@wifi-iface[0].ssid='Zsun Recovery'
++uci commit wireless
++
++# save recovery configuration
++recovery-config save
+diff --git a/target/linux/ath79/base-files/sbin/mount-firmware b/target/linux/ath79/base-files/sbin/mount-firmware
+new file mode 100755
+index 0000000..1f4d356
+--- /dev/null
++++ b/target/linux/ath79/base-files/sbin/mount-firmware
+@@ -0,0 +1,79 @@
++#!/bin/sh
++
++# check if firmware is already mounted
++if egrep -qs "^overlayfs:/firmware " /proc/mounts; then
++    echo "firmware is already mounted">&2
++    exit 1
++fi
++
++# find firmware mtd partition
++firmware=$(grep '"firmware"' /proc/mtd | cut -d: -f1)
++firmware_size=$(cat /sys/class/mtd/${firmware}/size)
++firmware_blocksize=$(cat /sys/class/mtd/${firmware}/erasesize)
++
++# setup filesystem markers (rootfs: squashfs, rootfs_data: jffs2)
++rootfs_marker="6873"
++rootfsdata_marker="(deadc0de|1985)"
++
++# search for the rootfs filesystem offset within the firmware mtd partition
++rootfs_offset=0
++while [ ${rootfs_offset} -lt ${firmware_size} ]; do
++    # dump four bytes at offset (as hexadecimal string) and check if matches the marker pattern
++    if hexdump -e '"%x"' -n 4 -s ${rootfs_offset} /dev/${firmware} | egrep -qs "^${rootfs_marker}"; then
++        # marker found, break loop
++        break
++    fi
++    # continue searching, move to the next mtd block
++    rootfs_offset=$((rootfs_offset + firmware_blocksize))
++done
++
++# search for the rootfs_data filesystem offset within the firmware mtd partition
++rootfsdata_offset=$((rootfs_offset + firmware_blocksize))
++while [ ${rootfsdata_offset} -lt ${firmware_size} ]; do
++    # dump four bytes at offset (as hexadecimal string) and check if matches the marker pattern
++    if hexdump -e '"%x"' -n 4 -s ${rootfsdata_offset} /dev/${firmware} | egrep -qs "^${rootfsdata_marker}"; then
++        # marker found, break loop
++        break
++    fi
++    # continue searching, move to the next mtd block
++    rootfsdata_offset=$((rootfsdata_offset + firmware_blocksize))
++done
++
++# calculate filesystem sizes
++rootfs_size=$((rootfsdata_offset - rootfs_offset))
++rootfsdata_size=$((firmware_size - rootfsdata_offset))
++
++# create loop device for each filesystem (virtual "partition" delimited by offset and size)
++rootfs_loop=$(losetup --offset ${rootfs_offset} --sizelimit ${rootfs_size} -f --show /dev/mtdblock${firmware:3})
++rootfsdata_loop=$(losetup --offset ${rootfsdata_offset} --sizelimit ${rootfsdata_size} -f --show /dev/mtdblock${firmware:3})
++
++# create virtual mtd for the loop devices
++modprobe -q block2mtd
++echo "${rootfs_loop},${firmware_blocksize}" > /sys/module/block2mtd/parameters/block2mtd
++echo "${rootfsdata_loop},${firmware_blocksize}" > /sys/module/block2mtd/parameters/block2mtd
++
++# search for the newly created mtd names
++rootfs=$(grep '"'${rootfs_loop}'"' /proc/mtd | cut -d: -f1)
++rootfsdata=$(grep '"'${rootfsdata_loop}'"' /proc/mtd | cut -d: -f1)
++
++# create mountpoint if needed
++[ ! -d /firmware ] && mkdir /firmware
++
++# mount filesystems (rootfs and rootfs_data)
++mount -t squashfs /dev/mtdblock${rootfs:3} /firmware
++mount -t jffs2 -o noatime /dev/mtdblock${rootfsdata:3} /firmware/overlay
++
++# initialize rootfs_data
++[ ! -d /firmware/overlay/upper ] && mkdir /firmware/overlay/upper
++[ ! -d /firmware/overlay/work ] && mkdir /firmware/overlay/work
++[ ! -h /firmware/overlay/.fs_state ] && ln -s 2 /firmware/overlay/.fs_state
++
++# create rootfs_data overlay at /mnt
++mount -t overlay -o noatime,lowerdir=/firmware,upperdir=/firmware/overlay/upper,workdir=/firmware/overlay/work overlayfs:/firmware /mnt
++
++# combine all mountpoints on /mnt
++mount --move /firmware/overlay /mnt/overlay
++mount --move /firmware /mnt/rom
++
++# finally, move the result to /firmware
++mount --move /mnt /firmware
+diff --git a/target/linux/ath79/base-files/sbin/mtd-rw b/target/linux/ath79/base-files/sbin/mtd-rw
+new file mode 100755
+index 0000000..3aa2bd2
+--- /dev/null
++++ b/target/linux/ath79/base-files/sbin/mtd-rw
+@@ -0,0 +1,25 @@
++#!/bin/sh
++
++case "$1" in
++    lock) # lock all mtd partitions
++       "$0" unlocked && rmmod mtd-rw
++       ;;
++
++    unlock) # unlock all mtd partitions
++        "$0" locked && insmod "$(find /lib/modules/ -name mtd-rw.ko)" i_want_a_brick=1
++        ;;
++
++    locked) # check if mtd partitions are locked
++        ! "$0" unlocked
++        ;;
++
++    unlocked) # check if mtd partitions are unlocked
++        lsmod | egrep -qs "^mtd_rw "
++        ;;
++
++    *) # usage help message
++        echo "Usage: $(basename $0) <lock|unlock|locked|unlocked>"
++        ;;
++esac
++
++exit $?
+diff --git a/target/linux/ath79/base-files/sbin/recovery-config b/target/linux/ath79/base-files/sbin/recovery-config
+new file mode 100755
+index 0000000..c295500
+--- /dev/null
++++ b/target/linux/ath79/base-files/sbin/recovery-config
+@@ -0,0 +1,37 @@
++#!/bin/sh
++
++# check if script arguments are valid
++if [ "$1" != "save" -a "$1" != "reset" ]; then
++    # display usage message in case of insufficient or invalid arguments
++    echo "Usage: $(basename $0) <save|reset>"
++    exit 1
++fi
++
++# check mtd state and unlock if needed
++if mtd-rw locked; then
++    mtd-rw unlock
++    relock=1
++fi
++
++# check whether to save or reset the current configuration
++if [ "$1" == "save" ]; then
++    # create archive of the current configuration
++    tar czf /tmp/config.tar.gz -C /volatile/upper $(ls /volatile/upper/)
++else
++    # create an empty configuration archive
++    dd if=/dev/zero bs=10240 count=1 2>/dev/null | gzip > /tmp/config.tar.gz
++fi
++
++# store the configuration archive to mtd
++snapshot_tool config_write &>/dev/null
++if [ "$?" != "0" ]; then
++    echo "operation failed"
++fi
++
++# clean up configuration archive
++rm -f /tmp/config.tar.gz
++
++# lock mtd if it was unlocked by this script
++if [ "${relock}" == "1" ]; then
++    mtd-rw lock
++fi
+diff --git a/target/linux/ath79/base-files/sbin/reset-firmware b/target/linux/ath79/base-files/sbin/reset-firmware
+new file mode 100755
+index 0000000..aa7857b
+--- /dev/null
++++ b/target/linux/ath79/base-files/sbin/reset-firmware
+@@ -0,0 +1,42 @@
++#!/bin/sh
++
++# display warn message, wait for user confirmation before continuing
++echo -n "erase all settings and remove any installed packages? [N/y] ">&2 && read
++[ "${REPLY}" != "y" ] && exit 1
++
++# check firmware mount state to then delete data accordingly
++if egrep -qs "^overlayfs:/firmware " /proc/mounts; then
++    # inform user about firmware mount state and action taken to reset rootfs_data
++    echo "firmware is mounted, only erasing files">&2
++
++    # erase all files (including "dot" and "dot-dot" files)
++    rm -rf /firmware/overlay/upper/*
++    rm -rf /firmware/overlay/upper/.[^.]*
++    rm -rf /firmware/overlay/upper/..?*
++else
++    # inform user about firmware mount state and action taken to reset rootfs_data
++    echo "firmware not mounted, marking it to be erased on next mount">&2
++
++    # find firmware mtd partition
++    firmware=$(grep '"firmware"' /proc/mtd | cut -d: -f1)
++    firmware_size=$(cat /sys/class/mtd/${firmware}/size)
++    firmware_blocksize=$(cat /sys/class/mtd/${firmware}/erasesize)
++
++    # initialize rootfs_data search variables
++    rootfsdata_marker="(deadc0de|1985)"
++    rootfsdata_offset=0
++
++    # search for rootfs_data inside firmware mtd partition
++    while [ ${rootfsdata_offset} -lt ${firmware_size} ]; do
++        # dump four bytes at offset (as hexadecimal string) and check if matches the marker pattern
++        if hexdump -e '"%x"' -n 4 -s ${rootfsdata_offset} /dev/${firmware} | egrep -qs "^${rootfsdata_marker}"; then
++            # marker found, break loop
++            break
++        fi
++        # continue searching, move to the next mtd block
++        rootfsdata_offset=$((rootfsdata_offset + firmware_blocksize))
++    done
++
++    # write jffs2 marker (0xdeadc0de) to force initialization of rootfs_data on the next mount
++    echo -ne "\xde\xad\xc0\xde" | dd of=/dev/mtdblock${firmware:3} bs=${firmware_blocksize} seek=$((rootfsdata_offset / firmware_blocksize)) count=1 conv=sync &>/dev/null
++fi
+diff --git a/target/linux/ath79/base-files/sbin/umount-firmware b/target/linux/ath79/base-files/sbin/umount-firmware
+new file mode 100755
+index 0000000..e167bbc
+--- /dev/null
++++ b/target/linux/ath79/base-files/sbin/umount-firmware
+@@ -0,0 +1,27 @@
++#!/bin/sh
++
++# check if firmware is mounted
++if ! egrep -qs "^overlayfs:/firmware " /proc/mounts; then
++    echo "firmware is not mounted">&2
++    exit 1
++fi
++
++# search /proc/mounts for firmware's virtual mtd devices
++rootfs=$(grep " /firmware/rom " /proc/mounts | cut -d" " -f1 | cut -d/ -f3 | sed 's/block//')
++rootfsdata=$(grep " /firmware/overlay " /proc/mounts | cut -d" " -f1 | cut -d/ -f3 | sed 's/block//')
++
++# map the virtual mtd devices to the corresponding loop devices
++rootfs_loop=$(egrep "^${rootfs}:" /proc/mtd | cut -d\" -f2)
++rootfsdata_loop=$(egrep "^${rootfsdata}:" /proc/mtd | cut -d\" -f2)
++
++# umount all mountpoints
++umount /firmware/overlay
++umount /firmware/rom
++umount /firmware
++
++# remove virtual mtd devices (only possible by unloading the block2mtd kernel module)
++rmmod block2mtd
++
++# remove the corresponding loop devices
++losetup -d ${rootfs_loop}
++losetup -d ${rootfsdata_loop}
+diff --git a/target/linux/ath79/dts/ar9331_zsun_sd100-recovery.dts b/target/linux/ath79/dts/ar9331_zsun_sd100-recovery.dts
+new file mode 100644
+index 0000000..72956b4
+--- /dev/null
++++ b/target/linux/ath79/dts/ar9331_zsun_sd100-recovery.dts
+@@ -0,0 +1,138 @@
++// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
++/dts-v1/;
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/input.h>
++
++#include "ar9331.dtsi"
++
++/ {
++	model = "Zsun SD100 (Recovery)";
++	compatible = "zsun,sd100-recovery", "qca,ar9331";
++
++	aliases {
++		led-boot = &led_status;
++		led-failsafe = &led_status;
++		led-running = &led_status;
++		led-upgrade = &led_status;
++		serial0 = &uart;
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		led_status: status {
++			label = "sd100:green:status";
++			gpios = <&gpio 0 GPIO_ACTIVE_HIGH>;
++			default-state = "on";
++		};
++	};
++
++	keys {
++		compatible = "gpio-keys";
++
++		sdcard_event {
++			label = "sdcard_event";
++			linux,code = <BTN_0>;
++			gpios = <&gpio 22 GPIO_ACTIVE_LOW>;
++		};
++	};
++
++	gpio-export {
++		compatible = "gpio-export";
++
++		sdreader_reset {
++			gpio-export,name = "sdreader_reset";
++			gpio-export,output = <1>;
++			gpios = <&gpio 18 GPIO_ACTIVE_LOW>;
++		};
++
++		sdreader_switch {
++			gpio-export,name = "sdreader_switch";
++			gpio-export,output = <0>;
++			gpios = <&gpio 21 GPIO_ACTIVE_HIGH>;
++		};
++	};
++};
++
++&spi {
++	status = "okay";
++
++	num-chipselects = <0>;
++
++	flash@0 {
++		compatible = "jedec,spi-nor";
++		spi-max-frequency = <104000000>;
++		reg = <0>;
++
++		partitions {
++			compatible = "fixed-partitions";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			partition@0 {
++				label = "u-boot";
++				reg = <0x000000 0x010000>;
++				read-only;
++			};
++
++			partition@10000 {
++				label = "u-boot-env";
++				reg = <0x010000 0x010000>;
++				read-only;
++			};
++
++			partition@20000 {
++				label = "firmware";
++				reg = <0x020000 0xbc0000>;
++			};
++
++			partition@be0000 {
++				label = "recovery";
++				reg = <0xbe0000 0x400000>;
++				read-only;
++			};
++
++			partition@fe0000 {
++				label = "nvram";
++				reg = <0xfe0000 0x010000>;
++				read-only;
++			};
++
++			art: partition@ff0000 {
++				label = "art";
++				reg = <0xff0000 0x010000>;
++				read-only;
++			};
++		};
++	};
++};
++
++&uart {
++	status = "okay";
++};
++
++&gpio {
++	status = "okay";
++};
++
++&usb {
++	status = "okay";
++
++	compatible = "generic-ehci";
++	reg = <0x1b000000 0x1000>;
++
++	has-transaction-translator;
++	caps-offset = <0x100>;
++};
++
++&usb_phy {
++	status = "okay";
++};
++
++&wmac {
++	status = "okay";
++
++	mtd-cal-data = <&art 0x1000>;
++	mtd-mac-address = <&art 0x1002>;
++};
+diff --git a/target/linux/ath79/image/generic.mk b/target/linux/ath79/image/generic.mk
+index 55053be..5732ded 100644
+--- a/target/linux/ath79/image/generic.mk
++++ b/target/linux/ath79/image/generic.mk
+@@ -751,3 +751,15 @@ define Device/zbtlink_zbt-wd323
+ 		     kmod-usb-serial kmod-usb-serial-cp210x uqmi
+ endef
+ TARGET_DEVICES += zbtlink_zbt-wd323
++
++define Device/zsun_sd100-recovery
++  ATH_SOC := ar9331
++  DEVICE_TITLE := Zsun SD100 (Recovery)
++  DEVICE_PACKAGES := kmod-usb2 kmod-usb-storage -ppp -ppp-mod-pppoe -swconfig \
++                     kmod-block2mtd kmod-loop kmod-mtd-rw losetup snapshot-tool
++  IMAGE_SIZE := 4096k
++  IMAGE/sysupgrade.bin := append-kernel | pad-to $$$$(BLOCKSIZE) | \
++    append-rootfs | pad-to $$$$(BLOCKSIZE) | append-string OWRT | \
++    pad-to $$$$(IMAGE_SIZE) | check-size $$$$(IMAGE_SIZE)
++endef
++TARGET_DEVICES += zsun_sd100-recovery
+diff --git a/target/linux/generic/config-4.14 b/target/linux/generic/config-4.14
+index de8dd8b..66d092a 100644
+--- a/target/linux/generic/config-4.14
++++ b/target/linux/generic/config-4.14
+@@ -2890,7 +2890,7 @@ CONFIG_MTD_SPLIT=y
+ # CONFIG_MTD_SPLIT_BRNIMAGE_FW is not set
+ # CONFIG_MTD_SPLIT_EVA_FW is not set
+ # CONFIG_MTD_SPLIT_FIRMWARE is not set
+-CONFIG_MTD_SPLIT_FIRMWARE_NAME="firmware"
++CONFIG_MTD_SPLIT_FIRMWARE_NAME="recovery"
+ # CONFIG_MTD_SPLIT_FIT_FW is not set
+ # CONFIG_MTD_SPLIT_JIMAGE_FW is not set
+ # CONFIG_MTD_SPLIT_LZMA_FW is not set
+diff --git a/target/linux/generic/hack-4.14/410-inherit-parent-partition-access-mode.patch b/target/linux/generic/hack-4.14/410-inherit-parent-partition-access-mode.patch
+new file mode 100644
+index 0000000..8f6fcc6
+--- /dev/null
++++ b/target/linux/generic/hack-4.14/410-inherit-parent-partition-access-mode.patch
+@@ -0,0 +1,68 @@
++--- a/drivers/mtd/mtdchar.c
+++++ b/drivers/mtd/mtdchar.c
++@@ -575,6 +575,7 @@
++ 			       struct blkpg_ioctl_arg *arg)
++ {
++ 	struct blkpg_partition p;
+++	uint32_t mask_flags;
++ 
++ 	if (!capable(CAP_SYS_ADMIN))
++ 		return -EPERM;
++@@ -592,7 +593,10 @@
++ 		/* Sanitize user input */
++ 		p.devname[BLKPG_DEVNAMELTH - 1] = '\0';
++ 
++-		return mtd_add_partition(mtd, p.devname, p.start, p.length);
+++		/* No mtd flags masking required */
+++		mask_flags = 0;
+++
+++		return mtd_add_partition(mtd, p.devname, p.start, p.length, mask_flags);
++ 
++ 	case BLKPG_DEL_PARTITION:
++ 
++--- a/drivers/mtd/mtdpart.c
+++++ b/drivers/mtd/mtdpart.c
++@@ -726,7 +726,7 @@
++ }
++ 
++ int mtd_add_partition(struct mtd_info *parent, const char *name,
++-		      long long offset, long long length)
+++		      long long offset, long long length, uint32_t mask_flags)
++ {
++ 	struct mtd_partition part;
++ 	struct mtd_part *new;
++@@ -747,6 +747,7 @@
++ 	part.name = name;
++ 	part.size = length;
++ 	part.offset = offset;
+++	part.mask_flags = mask_flags;
++ 
++ 	new = allocate_partition(parent, &part, -1, offset);
++ 	if (IS_ERR(new))
++@@ -866,10 +867,14 @@
++ 		/* adjust partition offsets */
++ 		parts[i].offset += slave->offset;
++ 
+++		/* adjust partition mask */
+++		parts[i].mask_flags = !(slave->mtd.orig_flags & MTD_WRITEABLE) ? MTD_WRITEABLE : 0;
+++
++ 		mtd_add_partition(slave->parent,
++ 				  parts[i].name,
++ 				  parts[i].offset,
++-				  parts[i].size);
+++				  parts[i].size,
+++				  parts[i].mask_flags);
++ 	}
++ 
++ 	kfree(parts);
++--- a/include/linux/mtd/partitions.h
+++++ b/include/linux/mtd/partitions.h
++@@ -114,7 +114,7 @@
++ 
++ int mtd_is_partition(const struct mtd_info *mtd);
++ int mtd_add_partition(struct mtd_info *master, const char *name,
++-		      long long offset, long long length);
+++		      long long offset, long long length, uint32_t mask_flags);
++ int mtd_del_partition(struct mtd_info *master, int partno);
++ struct mtd_info *mtdpart_get_master(const struct mtd_info *mtd);
++ uint64_t mtdpart_get_offset(const struct mtd_info *mtd);
+diff --git a/target/linux/generic/hack-4.14/442-block2mtd_exit.patch b/target/linux/generic/hack-4.14/442-block2mtd_exit.patch
+new file mode 100644
+index 0000000..655f914
+--- /dev/null
++++ b/target/linux/generic/hack-4.14/442-block2mtd_exit.patch
+@@ -0,0 +1,11 @@
++--- a/drivers/mtd/devices/block2mtd.c
+++++ b/drivers/mtd/devices/block2mtd.c
++@@ -500,7 +500,7 @@
++ 		mutex_destroy(&dev->write_mutex);
++ 		pr_info("mtd%d: [%s] removed\n",
++ 			dev->mtd.index,
++-			dev->mtd.name + strlen("block2mtd: "));
+++			dev->mtd.name);
++ 		list_del(&dev->list);
++ 		block2mtd_free_device(dev);
++ 	}
