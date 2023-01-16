@@ -381,11 +381,14 @@ Below you'll find instructions on how to build each of the images you find on th
 
 ## Build environment
 
-All images have been compiled using a clean installation of Ubuntu Server 16.04:
-  1. Install Ubuntu Server 16.04 on a VM using the official [Network Installer](http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/mini.iso) image.
+All images up to OpenWrt 21.02.5 have been compiled using a clean installation of Ubuntu Server 16.04.<br/>
+Starting with OpenWrt 22.03.0-rc1, all images have been compiled using a clean installation of Ubuntu Server 18.04.
+  1. Download and install Ubuntu Server on a VM:
+     * Ubuntu Server 16.04: [Network Installer](http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/mini.iso)
+     * Ubuntu Server 18.04: [Network Installer](http://archive.ubuntu.com/ubuntu/dists/bionic-updates/main/installer-amd64/current/images/netboot/mini.iso)
   2. Once done, install the required build dependencies:
 ```
-sudo apt install build-essential python libncurses5-dev libssl-dev zlib1g-dev
+sudo apt install build-essential pkg-config python libncurses5-dev libssl-dev zlib1g-dev
 sudo apt install gawk gettext unzip subversion git
 ```
   3. Clone this repository so you have all patches available on your environment:
