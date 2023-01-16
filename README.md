@@ -243,6 +243,12 @@ Download the mtd-rw kernel module for your OpenWrt version:
 | OpenWrt 21.02.3 | [kmod-mtd-rw_5.4.188+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/21.02.3/kmod-mtd-rw_5.4.188+git-20160214-2_mips_24kc.ipk) |
 | OpenWrt 21.02.4 | [kmod-mtd-rw_5.4.215+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/21.02.4/kmod-mtd-rw_5.4.215+git-20160214-2_mips_24kc.ipk) |
 | OpenWrt 21.02.5 | [kmod-mtd-rw_5.4.215+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/21.02.5/kmod-mtd-rw_5.4.215+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 22.03.0-rc1 | [kmod-mtd-rw_5.10.111+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.0-rc1/kmod-mtd-rw_5.10.111+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 22.03.0-rc2 | [kmod-mtd-rw_5.10.116+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.0-rc2/kmod-mtd-rw_5.10.116+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 22.03.0-rc3 | [kmod-mtd-rw_5.10.116+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.0-rc3/kmod-mtd-rw_5.10.116+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 22.03.0-rc4 | [kmod-mtd-rw_5.10.120+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.0-rc4/kmod-mtd-rw_5.10.120+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 22.03.0-rc5 | [kmod-mtd-rw_5.10.127+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.0-rc5/kmod-mtd-rw_5.10.127+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 22.03.0-rc6 | [kmod-mtd-rw_5.10.134+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.0-rc6/kmod-mtd-rw_5.10.134+git-20160214-2_mips_24kc.ipk) |
 
 Copy the file to the `/tmp` directory of your Zsun-SD100 and then use the following command to install it:
 ```
