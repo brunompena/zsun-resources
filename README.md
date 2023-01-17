@@ -68,18 +68,18 @@ Download the corresponding files for your firmware version:
 
 | Version | Update Image Parts |
 | ------- | ------------------ |
-| Original Firmware (part1) | [zsun-sd100.update.variant1.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part1.bin) |
-| Original Firmware (part2) | [zsun-sd100.update.variant1.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part2.bin) |
-| Emeryth 15.05.0 Firmware (part1) | [zsun-sd100.update.variant1.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part1.bin) |
-| Emeryth 15.05.0 Firmware (part2) | [zsun-sd100.update.variant1.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part2.bin) |
-| maurer 17.01.4 Firmware (part1) | [zsun-sd100.update.variant1.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part1.bin) |
-| maurer 17.01.4 Firmware (part2) | [zsun-sd100.update.variant1.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part2.bin) |
-| puteulanus 17.01.6 Firmware (part1) | [zsun-sd100.update.variant1.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part1.bin) |
-| puteulanus 17.01.6 Firmware (part2) | [zsun-sd100.update.variant1.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant1.part2.bin) |
-| puteulanus 18.06.1 Firmware (part1) | [zsun-sd100.update.variant2.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant2.part1.bin) |
-| puteulanus 18.06.1 Firmware (part2) | [zsun-sd100.update.variant2.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant2.part2.bin) |
-| puteulanus 18.06.1_rec Firmware (part1) | [zsun-sd100.update.variant3.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant3.part1.bin) |
-| puteulanus 18.06.1_rec Firmware (part2) | [zsun-sd100.update.variant3.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.update.variant3.part2.bin) |
+| Original Firmware (part1) | [zsun-sd100.update.variant1.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc1/zsun-sd100.update.variant1.part1.bin) |
+| Original Firmware (part2) | [zsun-sd100.update.variant1.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc1/zsun-sd100.update.variant1.part2.bin) |
+| Emeryth 15.05.0 Firmware (part1) | [zsun-sd100.update.variant1.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc1/zsun-sd100.update.variant1.part1.bin) |
+| Emeryth 15.05.0 Firmware (part2) | [zsun-sd100.update.variant1.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc1/zsun-sd100.update.variant1.part2.bin) |
+| maurer 17.01.4 Firmware (part1) | [zsun-sd100.update.variant1.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc1/zsun-sd100.update.variant1.part1.bin) |
+| maurer 17.01.4 Firmware (part2) | [zsun-sd100.update.variant1.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc1/zsun-sd100.update.variant1.part2.bin) |
+| puteulanus 17.01.6 Firmware (part1) | [zsun-sd100.update.variant1.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc1/zsun-sd100.update.variant1.part1.bin) |
+| puteulanus 17.01.6 Firmware (part2) | [zsun-sd100.update.variant1.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc1/zsun-sd100.update.variant1.part2.bin) |
+| puteulanus 18.06.1 Firmware (part1) | [zsun-sd100.update.variant2.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc1/zsun-sd100.update.variant2.part1.bin) |
+| puteulanus 18.06.1 Firmware (part2) | [zsun-sd100.update.variant2.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc1/zsun-sd100.update.variant2.part2.bin) |
+| puteulanus 18.06.1_rec Firmware (part1) | [zsun-sd100.update.variant3.part1.bin](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc1/zsun-sd100.update.variant3.part1.bin) |
+| puteulanus 18.06.1_rec Firmware (part2) | [zsun-sd100.update.variant3.part2.bin](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc1/zsun-sd100.update.variant3.part2.bin) |
 
 ## Prepare device for update
 
@@ -222,7 +222,7 @@ Download the mtd-rw kernel module for your OpenWrt version:
 
 | Version | mtd-rw kernel module |
 | ------- | ------------------ |
-| OpenWrt 19.07.0-rc1 | [kmod-mtd-rw_4.14.151+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/v1.0/kmod-mtd-rw_4.14.151+git-20160214-1_mips_24kc.ipk) |
+| OpenWrt 19.07.0-rc1 | [kmod-mtd-rw_4.14.151+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc1/kmod-mtd-rw_4.14.151+git-20160214-1_mips_24kc.ipk) |
 | OpenWrt 19.07.0-rc2 | [kmod-mtd-rw_4.14.156+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc2/kmod-mtd-rw_4.14.156+git-20160214-1_mips_24kc.ipk) |
 | OpenWrt 19.07.0 | [kmod-mtd-rw_4.14.162+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.0/kmod-mtd-rw_4.14.162+git-20160214-1_mips_24kc.ipk) |
 | OpenWrt 19.07.1 | [kmod-mtd-rw_4.14.167+git-20160214-1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/19.07.1/kmod-mtd-rw_4.14.167+git-20160214-1_mips_24kc.ipk) |
@@ -266,7 +266,7 @@ Download the recovery image:
 
 | Version | Recovery Image |
 | ------- | -------------- |
-| Recovery Image 18.06.5 | [zsun-sd100.recovery.bin](https://github.com/brunompena/zsun-resources/releases/download/v1.0/zsun-sd100.recovery.bin) |
+| Recovery Image 18.06.5 | [zsun-sd100.recovery.bin](https://github.com/brunompena/zsun-resources/releases/download/19.07.0-rc1/zsun-sd100.recovery.bin) |
 
 Then copy it to the `/tmp` directory of your Zsun-SD100 and check its md5sum:
 ```
