@@ -1,12 +1,12 @@
 
 # Introduction
 
-This repository contains all the information needed to update the firmware of Zsun-SD100 to OpenWrt version 21.02.
+This repository contains all the information needed to update the firmware of Zsun-SD100 to OpenWrt version 22.03.
 
 ## Main features
 
 These are the main features of this release when compared to other community releases:
- - Firmware image based on OpenWrt 21.02
+ - Firmware image based on OpenWrt 22.03
 	- *the latest and greatest release*
  - Recovery image based on OpenWrt 19.07 (no more bricking!)
 	- *the old-stable branch which introduced the new ath79 architecture*
@@ -249,6 +249,10 @@ Download the mtd-rw kernel module for your OpenWrt version:
 | OpenWrt 22.03.0-rc4 | [kmod-mtd-rw_5.10.120+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.0-rc4/kmod-mtd-rw_5.10.120+git-20160214-2_mips_24kc.ipk) |
 | OpenWrt 22.03.0-rc5 | [kmod-mtd-rw_5.10.127+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.0-rc5/kmod-mtd-rw_5.10.127+git-20160214-2_mips_24kc.ipk) |
 | OpenWrt 22.03.0-rc6 | [kmod-mtd-rw_5.10.134+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.0-rc6/kmod-mtd-rw_5.10.134+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 22.03.0 | [kmod-mtd-rw_5.10.138+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.0/kmod-mtd-rw_5.10.138+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 22.03.1 | [kmod-mtd-rw_5.10.146+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.1/kmod-mtd-rw_5.10.146+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 22.03.2 | [kmod-mtd-rw_5.10.146+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.2/kmod-mtd-rw_5.10.146+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 22.03.3 | [kmod-mtd-rw_5.10.161+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.3/kmod-mtd-rw_5.10.161+git-20160214-2_mips_24kc.ipk) |
 
 Copy the file to the `/tmp` directory of your Zsun-SD100 and then use the following command to install it:
 ```
@@ -383,6 +387,8 @@ Below you'll find instructions on how to build each of the images you find on th
 
 All images up to OpenWrt 21.02.5 have been compiled using a clean installation of Ubuntu Server 16.04.<br/>
 Starting with OpenWrt 22.03.0-rc1, all images have been compiled using a clean installation of Ubuntu Server 18.04.
+
+Prepare your build environment using the instructions below:
   1. Download and install Ubuntu Server on a VM:
      * Ubuntu Server 16.04: [Network Installer](http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/mini.iso)
      * Ubuntu Server 18.04: [Network Installer](http://archive.ubuntu.com/ubuntu/dists/bionic-updates/main/installer-amd64/current/images/netboot/mini.iso)
