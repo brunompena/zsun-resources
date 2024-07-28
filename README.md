@@ -253,6 +253,19 @@ Download the mtd-rw kernel module for your OpenWrt version:
 | OpenWrt 22.03.1 | [kmod-mtd-rw_5.10.146+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.1/kmod-mtd-rw_5.10.146+git-20160214-2_mips_24kc.ipk) |
 | OpenWrt 22.03.2 | [kmod-mtd-rw_5.10.146+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.2/kmod-mtd-rw_5.10.146+git-20160214-2_mips_24kc.ipk) |
 | OpenWrt 22.03.3 | [kmod-mtd-rw_5.10.161+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.3/kmod-mtd-rw_5.10.161+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 22.03.4 | [kmod-mtd-rw_5.10.176+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.4/kmod-mtd-rw_5.10.176+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 22.03.5 | [kmod-mtd-rw_5.10.176+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.5/kmod-mtd-rw_5.10.176+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 22.03.6 | [kmod-mtd-rw_5.10.201+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.6/kmod-mtd-rw_5.10.201+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 22.03.7 | [kmod-mtd-rw_5.10.221+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/22.03.7/kmod-mtd-rw_5.10.221+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 23.05.0-rc1 | [kmod-mtd-rw_5.15.114+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.0-rc1/kmod-mtd-rw_5.15.114+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 23.05.0-rc2 | [kmod-mtd-rw_5.15.118+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.0-rc2/kmod-mtd-rw_5.15.118+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 23.05.0-rc3 | [kmod-mtd-rw_5.15.127+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.0-rc3/kmod-mtd-rw_5.15.127+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 23.05.0-rc4 | [kmod-mtd-rw_5.15.132+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.0-rc4/kmod-mtd-rw_5.15.132+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 23.05.0 | [kmod-mtd-rw_5.15.134+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.0/kmod-mtd-rw_5.15.134+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 23.05.1 | [kmod-mtd-rw_5.15.137+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.1/kmod-mtd-rw_5.15.137+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 23.05.2 | [kmod-mtd-rw_5.15.137+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.2/kmod-mtd-rw_5.15.137+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 23.05.3 | [kmod-mtd-rw_5.15.150+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.3/kmod-mtd-rw_5.15.150+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 23.05.4 | [kmod-mtd-rw_5.15.162+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.4/kmod-mtd-rw_5.15.162+git-20160214-2_mips_24kc.ipk) |
 
 Copy the file to the `/tmp` directory of your Zsun-SD100 and then use the following command to install it:
 ```
@@ -385,16 +398,19 @@ Below you'll find instructions on how to build each of the images you find on th
 
 ## Build environment
 
-All images up to OpenWrt 21.02.5 have been compiled using a clean installation of Ubuntu Server 16.04.<br/>
-Starting with OpenWrt 22.03.0-rc1, all images have been compiled using a clean installation of Ubuntu Server 18.04.
+All binary images available on this repository have been compiled using a clean installation of Ubuntu Server:
+  * Ubuntu Server 16.04: used for all the older images up to version 21.02.5
+  * Ubuntu Server 18.04: used for image versions between 22.03.0-rc1 and 22.03.7
+  * Ubuntu Server 20.04: used for all images from version 23.05.0-rc1 onwards
 
 Prepare your build environment using the instructions below:
   1. Download and install Ubuntu Server on a VM:
      * Ubuntu Server 16.04: [Network Installer](http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/mini.iso)
      * Ubuntu Server 18.04: [Network Installer](http://archive.ubuntu.com/ubuntu/dists/bionic-updates/main/installer-amd64/current/images/netboot/mini.iso)
+     * Ubuntu Server 20.04: [Network Installer](http://archive.ubuntu.com/ubuntu/dists/focal-updates/main/installer-amd64/current/legacy-images/netboot/mini.iso)
   2. Once done, install the required build dependencies:
 ```
-sudo apt install build-essential pkg-config python libncurses5-dev libssl-dev zlib1g-dev
+sudo apt install build-essential pkg-config python python3-distutils libncurses5-dev libssl-dev zlib1g-dev
 sudo apt install gawk gettext unzip subversion git
 ```
   3. Clone this repository so you have all patches available on your environment:
