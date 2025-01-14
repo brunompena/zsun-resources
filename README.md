@@ -1,12 +1,12 @@
 
 # Introduction
 
-This repository contains all the information needed to update the firmware of Zsun-SD100 to OpenWrt version 22.03.
+This repository contains all the information needed to update the firmware of Zsun-SD100 to OpenWrt version 24.10.
 
 ## Main features
 
 These are the main features of this release when compared to other community releases:
- - Firmware image based on OpenWrt 22.03
+ - Firmware image based on OpenWrt 24.10
 	- *the latest and greatest release*
  - Recovery image based on OpenWrt 19.07 (no more bricking!)
 	- *the old-stable branch which introduced the new ath79 architecture*
@@ -267,6 +267,11 @@ Download the mtd-rw kernel module for your OpenWrt version:
 | OpenWrt 23.05.3 | [kmod-mtd-rw_5.15.150+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.3/kmod-mtd-rw_5.15.150+git-20160214-2_mips_24kc.ipk) |
 | OpenWrt 23.05.4 | [kmod-mtd-rw_5.15.162+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.4/kmod-mtd-rw_5.15.162+git-20160214-2_mips_24kc.ipk) |
 | OpenWrt 23.05.5 | [kmod-mtd-rw_5.15.167+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.5/kmod-mtd-rw_5.15.167+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 24.10.0-rc1 | [kmod-mtd-rw_6.6.63.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.0-rc1/kmod-mtd-rw_6.6.63.2021.02.28.e8776739-r1_mips_24kc.ipk) |
+| OpenWrt 24.10.0-rc2 | [kmod-mtd-rw_6.6.63.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.0-rc2/kmod-mtd-rw_6.6.63.2021.02.28.e8776739-r1_mips_24kc.ipk) |
+| OpenWrt 24.10.0-rc3 | [kmod-mtd-rw_6.6.66.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.0-rc3/kmod-mtd-rw_6.6.66.2021.02.28.e8776739-r1_mips_24kc.ipk) |
+| OpenWrt 24.10.0-rc4 | [kmod-mtd-rw_6.6.67.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.0-rc4/kmod-mtd-rw_6.6.67.2021.02.28.e8776739-r1_mips_24kc.ipk) |
+| OpenWrt 24.10.0-rc5 | [kmod-mtd-rw_6.6.69.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.0-rc5/kmod-mtd-rw_6.6.69.2021.02.28.e8776739-r1_mips_24kc.ipk) |
 
 Copy the file to the `/tmp` directory of your Zsun-SD100 and then use the following command to install it:
 ```
@@ -493,10 +498,13 @@ Then execute the following commands to build your image:
 ```
 IMAGEBUILDER_PATCH="$(pwd)/zsun-resources/zsun-sd100.imagebuilder.ath79[v${IMAGEBUILDER_VERSION}].patch"
 IMAGEBUILDER_NAME="openwrt-imagebuilder-${IMAGEBUILDER_VERSION}-ath79-generic.Linux-x86_64"
-IMAGEBUILDER_URL="https://downloads.openwrt.org/releases/${IMAGEBUILDER_VERSION}/targets/ath79/generic/${IMAGEBUILDER_NAME}.tar.xz"
+IMAGEBUILDER_EXTENSION="$([[ ${IMAGEBUILDER_VERSION%%.*} < 24 ]] && echo "tar.xz" || echo "tar.zst")"
+IMAGEBUILDER_FILENAME="${IMAGEBUILDER_NAME}.${IMAGEBUILDER_EXTENSION}"
+IMAGEBUILDER_URL="https://downloads.openwrt.org/releases/${IMAGEBUILDER_VERSION}/targets/ath79/generic/${IMAGEBUILDER_FILENAME}"
 IMAGEBUILDER_IMAGE="$(pwd)/${IMAGEBUILDER_NAME}/bin/targets/ath79/generic/openwrt-${IMAGEBUILDER_VERSION}-ath79-generic-zsun_sd100-squashfs-sysupgrade.bin"
 
-wget -qO- "${IMAGEBUILDER_URL}" | tar xJvf -
+wget "${IMAGEBUILDER_URL}" -O "${IMAGEBUILDER_FILENAME}"
+tar xvf "${IMAGEBUILDER_FILENAME}"
 cd "${IMAGEBUILDER_NAME}"
 
 patch -p1 < "${IMAGEBUILDER_PATCH}"
