@@ -267,6 +267,7 @@ Download the mtd-rw kernel module for your OpenWrt version:
 | OpenWrt 23.05.3 | [kmod-mtd-rw_5.15.150+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.3/kmod-mtd-rw_5.15.150+git-20160214-2_mips_24kc.ipk) |
 | OpenWrt 23.05.4 | [kmod-mtd-rw_5.15.162+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.4/kmod-mtd-rw_5.15.162+git-20160214-2_mips_24kc.ipk) |
 | OpenWrt 23.05.5 | [kmod-mtd-rw_5.15.167+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.5/kmod-mtd-rw_5.15.167+git-20160214-2_mips_24kc.ipk) |
+| OpenWrt 23.05.6 | [kmod-mtd-rw_5.15.189+git-20160214-2_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/23.05.6/kmod-mtd-rw_5.15.189+git-20160214-2_mips_24kc.ipk) |
 | OpenWrt 24.10.0-rc1 | [kmod-mtd-rw_6.6.63.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.0-rc1/kmod-mtd-rw_6.6.63.2021.02.28.e8776739-r1_mips_24kc.ipk) |
 | OpenWrt 24.10.0-rc2 | [kmod-mtd-rw_6.6.63.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.0-rc2/kmod-mtd-rw_6.6.63.2021.02.28.e8776739-r1_mips_24kc.ipk) |
 | OpenWrt 24.10.0-rc3 | [kmod-mtd-rw_6.6.66.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.0-rc3/kmod-mtd-rw_6.6.66.2021.02.28.e8776739-r1_mips_24kc.ipk) |
