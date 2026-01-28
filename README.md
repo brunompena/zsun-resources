@@ -1,12 +1,12 @@
 
 # Introduction
 
-This repository contains all the information needed to update the firmware of Zsun-SD100 to OpenWrt version 24.10.
+This repository contains all the information needed to update the firmware of Zsun-SD100 to OpenWrt version 25.12.
 
 ## Main features
 
 These are the main features of this release when compared to other community releases:
- - Firmware image based on OpenWrt 24.10
+ - Firmware image based on OpenWrt 25.12
 	- *the latest and greatest release*
  - Recovery image based on OpenWrt 19.07 (no more bricking!)
 	- *the old-stable branch which introduced the new ath79 architecture*
@@ -107,7 +107,6 @@ If your files md5sum don't match the ones you see on the table then **STOP! DELE
 ### Remount filesystems as read-only 
 
 Remount the main filesystems as read-only to avoid data corruption:
-
  - For the *Original Firmware* execute:
 ```
 mount -o remount,ro /dev/root /
@@ -281,10 +280,17 @@ Download the mtd-rw kernel module for your OpenWrt version:
 | OpenWrt 24.10.3 | [kmod-mtd-rw_6.6.104.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.3/kmod-mtd-rw_6.6.104.2021.02.28.e8776739-r1_mips_24kc.ipk) |
 | OpenWrt 24.10.4 | [kmod-mtd-rw_6.6.110.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.4/kmod-mtd-rw_6.6.110.2021.02.28.e8776739-r1_mips_24kc.ipk) |
 | OpenWrt 24.10.5 | [kmod-mtd-rw_6.6.119.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.5/kmod-mtd-rw_6.6.119.2021.02.28.e8776739-r1_mips_24kc.ipk) |
+| OpenWrt 25.12.0-rc1 | [kmod-mtd-rw-6.12.62.2021.02.28.e8776739-r1.apk](https://github.com/brunompena/zsun-resources/releases/download/25.12.0-rc1/kmod-mtd-rw-6.12.62.2021.02.28.e8776739-r1.apk) |
+| OpenWrt 25.12.0-rc2 | [kmod-mtd-rw-6.12.63.2021.02.28.e8776739-r1.apk](https://github.com/brunompena/zsun-resources/releases/download/25.12.0-rc2/kmod-mtd-rw-6.12.63.2021.02.28.e8776739-r1.apk) |
+| OpenWrt 25.12.0-rc3 | [kmod-mtd-rw-6.12.66.2021.02.28.e8776739-r1.apk](https://github.com/brunompena/zsun-resources/releases/download/25.12.0-rc3/kmod-mtd-rw-6.12.66.2021.02.28.e8776739-r1.apk) |
 
 Copy the file to the `/tmp` directory of your Zsun-SD100 and then use the following command to install it:
 ```
+# For OpenWrt versions using the opkg package manager (<25.12.0-rc1):
 opkg install /tmp/kmod-mtd-rw_*.ipk
+
+# For OpenWrt versions using the apk package manager (>=25.12.0-rc1):
+apk add --no-network --allow-untrusted /tmp/kmod-mtd-rw-*.apk
 ```
 
 Finally, load the mtd-rw kernel module to change all partitions to read-write:
@@ -425,8 +431,8 @@ Prepare your build environment using the instructions below:
      * Ubuntu Server 20.04: [Network Installer](http://archive.ubuntu.com/ubuntu/dists/focal-updates/main/installer-amd64/current/legacy-images/netboot/mini.iso)
   2. Once done, install the required build dependencies:
 ```
-sudo apt install build-essential pkg-config python python3-distutils libncurses5-dev libssl-dev zlib1g-dev
-sudo apt install gawk gettext unzip subversion git
+sudo apt install build-essential pkg-config gawk gettext swig libncurses5-dev libssl-dev zlib1g-dev
+sudo apt install git subversion python python3-distutils python3-setuptools unzip
 ```
   3. Clone this repository so you have all patches available on your environment:
 ```
