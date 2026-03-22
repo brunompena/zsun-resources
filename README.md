@@ -284,6 +284,9 @@ Download the mtd-rw kernel module for your OpenWrt version:
 | OpenWrt 25.12.0-rc2 | [kmod-mtd-rw-6.12.63.2021.02.28.e8776739-r1.apk](https://github.com/brunompena/zsun-resources/releases/download/25.12.0-rc2/kmod-mtd-rw-6.12.63.2021.02.28.e8776739-r1.apk) |
 | OpenWrt 25.12.0-rc3 | [kmod-mtd-rw-6.12.66.2021.02.28.e8776739-r1.apk](https://github.com/brunompena/zsun-resources/releases/download/25.12.0-rc3/kmod-mtd-rw-6.12.66.2021.02.28.e8776739-r1.apk) |
 | OpenWrt 25.12.0-rc4 | [kmod-mtd-rw-6.12.66.2021.02.28.e8776739-r1.apk](https://github.com/brunompena/zsun-resources/releases/download/25.12.0-rc4/kmod-mtd-rw-6.12.66.2021.02.28.e8776739-r1.apk) |
+| OpenWrt 25.12.0-rc5 | [kmod-mtd-rw-6.12.71.2021.02.28.e8776739-r1.apk](https://github.com/brunompena/zsun-resources/releases/download/25.12.0-rc5/kmod-mtd-rw-6.12.71.2021.02.28.e8776739-r1.apk) |
+| OpenWrt 25.12.0 | [kmod-mtd-rw-6.12.71.2021.02.28.e8776739-r1.apk](https://github.com/brunompena/zsun-resources/releases/download/25.12.0/kmod-mtd-rw-6.12.71.2021.02.28.e8776739-r1.apk) |
+| OpenWrt 25.12.1 | [kmod-mtd-rw-6.12.74.2021.02.28.e8776739-r1.apk](https://github.com/brunompena/zsun-resources/releases/download/25.12.1/kmod-mtd-rw-6.12.74.2021.02.28.e8776739-r1.apk) |
 
 Copy the file to the `/tmp` directory of your Zsun-SD100 and then use the following command to install it:
 ```
