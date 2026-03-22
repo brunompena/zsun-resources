@@ -280,6 +280,7 @@ Download the mtd-rw kernel module for your OpenWrt version:
 | OpenWrt 24.10.3 | [kmod-mtd-rw_6.6.104.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.3/kmod-mtd-rw_6.6.104.2021.02.28.e8776739-r1_mips_24kc.ipk) |
 | OpenWrt 24.10.4 | [kmod-mtd-rw_6.6.110.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.4/kmod-mtd-rw_6.6.110.2021.02.28.e8776739-r1_mips_24kc.ipk) |
 | OpenWrt 24.10.5 | [kmod-mtd-rw_6.6.119.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.5/kmod-mtd-rw_6.6.119.2021.02.28.e8776739-r1_mips_24kc.ipk) |
+| OpenWrt 24.10.6 | [kmod-mtd-rw_6.6.127.2021.02.28.e8776739-r1_mips_24kc.ipk](https://github.com/brunompena/zsun-resources/releases/download/24.10.6/kmod-mtd-rw_6.6.127.2021.02.28.e8776739-r1_mips_24kc.ipk) |
 | OpenWrt 25.12.0-rc1 | [kmod-mtd-rw-6.12.62.2021.02.28.e8776739-r1.apk](https://github.com/brunompena/zsun-resources/releases/download/25.12.0-rc1/kmod-mtd-rw-6.12.62.2021.02.28.e8776739-r1.apk) |
 | OpenWrt 25.12.0-rc2 | [kmod-mtd-rw-6.12.63.2021.02.28.e8776739-r1.apk](https://github.com/brunompena/zsun-resources/releases/download/25.12.0-rc2/kmod-mtd-rw-6.12.63.2021.02.28.e8776739-r1.apk) |
 | OpenWrt 25.12.0-rc3 | [kmod-mtd-rw-6.12.66.2021.02.28.e8776739-r1.apk](https://github.com/brunompena/zsun-resources/releases/download/25.12.0-rc3/kmod-mtd-rw-6.12.66.2021.02.28.e8776739-r1.apk) |
